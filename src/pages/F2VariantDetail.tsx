@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,8 +9,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Loader2, ArrowLeft, Edit, Trash2, ExternalLink } from "lucide-react";
+import { Loader2, ArrowLeft, Edit, Trash2, ExternalLink, MessageSquare } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,6 +34,11 @@ const F2VariantDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [isNotesDialogOpen, setIsNotesDialogOpen] = useState(false);
+  const [notesFormData, setNotesFormData] = useState({
+    tasting_rating: "",
+    tasting_notes: "",
+  });
 
   const { data: variant, isLoading } = useQuery({
     queryKey: ["f2-variant", id],
@@ -58,6 +68,25 @@ const F2VariantDetail = () => {
     },
   });
 
+  const updateNotesMutation = useMutation({
+    mutationFn: async (data: { tasting_rating: number | null; tasting_notes: string | null }) => {
+      const { error } = await supabase
+        .from("f2_variant_batches")
+        .update(data)
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["f2-variant", id] });
+      queryClient.invalidateQueries({ queryKey: ["f2-variants"] });
+      setIsNotesDialogOpen(false);
+      toast.success("Tasting notes updated!");
+    },
+    onError: (error) => {
+      toast.error("Failed to update: " + error.message);
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from("f2_variant_batches").delete().eq("id", id);
@@ -72,6 +101,23 @@ const F2VariantDetail = () => {
       toast.error("Failed to delete: " + error.message);
     },
   });
+
+  const handleOpenNotesDialog = () => {
+    if (variant) {
+      setNotesFormData({
+        tasting_rating: variant.tasting_rating?.toString() || "",
+        tasting_notes: variant.tasting_notes || "",
+      });
+    }
+    setIsNotesDialogOpen(true);
+  };
+
+  const handleSaveNotes = () => {
+    updateNotesMutation.mutate({
+      tasting_rating: notesFormData.tasting_rating ? parseInt(notesFormData.tasting_rating) : null,
+      tasting_notes: notesFormData.tasting_notes || null,
+    });
+  };
 
   if (isLoading) {
     return (
@@ -115,6 +161,10 @@ const F2VariantDetail = () => {
             </div>
           </div>
           <div className="flex gap-2">
+            <Button variant="outline" onClick={handleOpenNotesDialog}>
+              <MessageSquare className="h-4 w-4 mr-2" />
+              {variant.tasting_notes || variant.tasting_rating ? "Edit Notes" : "Add Notes"}
+            </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="destructive">
@@ -209,7 +259,7 @@ const F2VariantDetail = () => {
             </div>
             <div>
               <div className="text-sm text-muted-foreground">Bottle Size</div>
-              <div className="text-2xl font-bold">{variant.bottle_size_liters}L</div>
+              <div className="text-2xl font-bold">{parseFloat(variant.bottle_size_liters.toString())}L</div>
             </div>
           </CardContent>
         </Card>
@@ -278,6 +328,50 @@ const F2VariantDetail = () => {
           </Card>
         )}
       </div>
+
+      <Dialog open={isNotesDialogOpen} onOpenChange={setIsNotesDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Tasting Notes</DialogTitle>
+            <DialogDescription>
+              Add your tasting notes and rating for this F2 variant
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="tasting_rating">Rating (1-10)</Label>
+              <Input
+                id="tasting_rating"
+                type="number"
+                min="1"
+                max="10"
+                value={notesFormData.tasting_rating}
+                onChange={(e) => setNotesFormData({ ...notesFormData, tasting_rating: e.target.value })}
+                placeholder="8"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="tasting_notes">Notes</Label>
+              <Textarea
+                id="tasting_notes"
+                value={notesFormData.tasting_notes}
+                onChange={(e) => setNotesFormData({ ...notesFormData, tasting_notes: e.target.value })}
+                placeholder="Describe the flavor, carbonation, appearance..."
+                rows={6}
+              />
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setIsNotesDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveNotes} disabled={updateNotesMutation.isPending}>
+                {updateNotesMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Save Notes
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };
