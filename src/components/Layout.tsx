@@ -19,10 +19,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Beaker className="h-8 w-8 text-primary" />
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">HIPPOTION</h1>
-                <p className="text-sm text-muted-foreground">Brew Log</p>
-              </div>
+              <h1 className="text-2xl font-bold text-foreground">Brew Buddy</h1>
             </div>
             <nav className="hidden md:flex gap-6">
               {navItems.map((item) => {
