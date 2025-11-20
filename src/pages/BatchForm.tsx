@@ -100,21 +100,24 @@ const BatchForm = () => {
 
   useEffect(() => {
     if (selectedRecipe && !isEdit) {
-      const startDate = new Date(formData.start_date);
-      if (selectedRecipe.target_f1_days_max) {
-        const targetDate = new Date(startDate);
-        targetDate.setDate(targetDate.getDate() + selectedRecipe.target_f1_days_max);
-        setFormData((prev) => ({
-          ...prev,
-          target_ready_date_f1: format(targetDate, "yyyy-MM-dd"),
-        }));
-      }
-      if (selectedRecipe.batch_size_liters && !formData.total_volume_liters) {
-        setFormData((prev) => ({
-          ...prev,
-          total_volume_liters: selectedRecipe.batch_size_liters?.toString() || "",
-        }));
-      }
+      setFormData((prev) => {
+        const updates: any = {};
+        
+        // Update target ready date if recipe has target days
+        if (selectedRecipe.target_f1_days_max) {
+          const startDate = new Date(prev.start_date);
+          const targetDate = new Date(startDate);
+          targetDate.setDate(targetDate.getDate() + selectedRecipe.target_f1_days_max);
+          updates.target_ready_date_f1 = format(targetDate, "yyyy-MM-dd");
+        }
+        
+        // Auto-fill volume from recipe if not manually set
+        if (selectedRecipe.batch_size_liters && !prev.total_volume_liters) {
+          updates.total_volume_liters = selectedRecipe.batch_size_liters.toString();
+        }
+        
+        return Object.keys(updates).length > 0 ? { ...prev, ...updates } : prev;
+      });
     }
   }, [selectedRecipe, formData.start_date, isEdit]);
 
