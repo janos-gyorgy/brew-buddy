@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -182,7 +183,7 @@ const BatchDetail = () => {
   });
 
   const updateStatusMutation = useMutation({
-    mutationFn: async (newStatus: "planned" | "fermenting_f1" | "ready_for_f2" | "fermenting_f2" | "cold_crash" | "bottled" | "finished" | "failed") => {
+    mutationFn: async (newStatus: Database["public"]["Enums"]["batch_status"]) => {
       const { error } = await supabase
         .from("batches")
         .update({ status: newStatus })
@@ -309,7 +310,7 @@ const BatchDetail = () => {
               </Badge>
               <Select
                 value={batch.status}
-                onValueChange={(value) => updateStatusMutation.mutate(value)}
+                onValueChange={(value) => updateStatusMutation.mutate(value as Database["public"]["Enums"]["batch_status"])}
               >
                 <SelectTrigger className="w-[250px]">
                   <SelectValue />
