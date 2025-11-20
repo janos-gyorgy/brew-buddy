@@ -118,6 +118,12 @@ const BatchForm = () => {
     }
   }, [selectedRecipe, formData.start_date, isEdit]);
 
+  const scaledQuantities = selectedRecipe && formData.total_volume_liters ? {
+    totalTea: (selectedRecipe.tea_amount_g_per_liter || 0) * parseFloat(formData.total_volume_liters || "0"),
+    totalSugar: (selectedRecipe.sugar_g_per_liter || 0) * parseFloat(formData.total_volume_liters || "0"),
+    starterVolume: (selectedRecipe.starter_percentage || 0) * parseFloat(formData.total_volume_liters || "0") / 100,
+  } : null;
+
   const saveMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
       const payload = {
@@ -210,12 +216,11 @@ const BatchForm = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="recipe_id">Recipe</Label>
-                  <Select value={formData.recipe_id} onValueChange={(v) => handleChange("recipe_id", v)}>
+                  <Select value={formData.recipe_id || undefined} onValueChange={(v) => handleChange("recipe_id", v)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select recipe (optional)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">No recipe</SelectItem>
                       {recipes?.map((recipe) => (
                         <SelectItem key={recipe.id} value={recipe.id}>
                           {recipe.name}
@@ -237,7 +242,14 @@ const BatchForm = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="total_volume_liters">Volume (L) *</Label>
+                  <Label htmlFor="total_volume_liters">
+                    Volume (L) *
+                    {selectedRecipe?.batch_size_liters && (
+                      <span className="text-sm text-muted-foreground ml-2">
+                        (Recipe: {selectedRecipe.batch_size_liters}L)
+                      </span>
+                    )}
+                  </Label>
                   <Input
                     id="total_volume_liters"
                     type="number"
@@ -269,6 +281,46 @@ const BatchForm = () => {
               </div>
             </CardContent>
           </Card>
+
+          {scaledQuantities && selectedRecipe && (
+            <Card className="bg-accent/10">
+              <CardHeader>
+                <CardTitle>Scaled Recipe Quantities</CardTitle>
+                <CardDescription>
+                  Calculated for {formData.total_volume_liters}L batch
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-3 md:grid-cols-3">
+                <div>
+                  <div className="text-sm text-muted-foreground">Total Tea</div>
+                  <div className="text-lg font-semibold">
+                    {Math.round(scaledQuantities.totalTea * 10) / 10}g
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    ({selectedRecipe.tea_amount_g_per_liter}g/L)
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground">Total Sugar</div>
+                  <div className="text-lg font-semibold">
+                    {Math.round(scaledQuantities.totalSugar * 10) / 10}g
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    ({selectedRecipe.sugar_g_per_liter}g/L)
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground">Starter Volume</div>
+                  <div className="text-lg font-semibold">
+                    {Math.round(scaledQuantities.starterVolume * 100) / 100}L
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    ({selectedRecipe.starter_percentage}%)
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <Card>
             <CardHeader>
