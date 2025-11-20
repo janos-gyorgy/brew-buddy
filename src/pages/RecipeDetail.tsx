@@ -101,9 +101,10 @@ const RecipeDetail = () => {
             <div>
               <h2 className="text-3xl font-bold text-foreground">{recipe.name}</h2>
               {recipe.intent_or_mood && (
-                <Badge variant="secondary" className="mt-2">
-                  {recipe.intent_or_mood}
-                </Badge>
+                <div className="mt-2">
+                  <span className="text-sm text-muted-foreground">Type: </span>
+                  <Badge variant="secondary">{recipe.intent_or_mood}</Badge>
+                </div>
               )}
             </div>
           </div>

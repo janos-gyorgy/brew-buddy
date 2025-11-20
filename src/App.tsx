@@ -11,6 +11,7 @@ import Batches from "./pages/Batches";
 import BatchForm from "./pages/BatchForm";
 import BatchDetail from "./pages/BatchDetail";
 import F2Variants from "./pages/F2Variants";
+import F2VariantDetail from "./pages/F2VariantDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/batches/:id" element={<BatchDetail />} />
           <Route path="/batches/:id/edit" element={<BatchForm />} />
           <Route path="/f2-variants" element={<F2Variants />} />
+          <Route path="/f2-variants/:id" element={<F2VariantDetail />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Loader2, Save, ArrowLeft } from "lucide-react";
 
@@ -169,13 +170,19 @@ const RecipeForm = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="intent_or_mood">Intent/Mood</Label>
-                  <Input
-                    id="intent_or_mood"
-                    value={formData.intent_or_mood}
-                    onChange={(e) => handleChange("intent_or_mood", e.target.value)}
-                    placeholder="Clarity, Relax, Ignite"
-                  />
+                  <Label htmlFor="intent_or_mood">Type/Line</Label>
+                  <Select value={formData.intent_or_mood} onValueChange={(v) => handleChange("intent_or_mood", v)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Signature">Signature</SelectItem>
+                      <SelectItem value="Seasonal">Seasonal</SelectItem>
+                      <SelectItem value="Speciality">Speciality</SelectItem>
+                      <SelectItem value="Experimental">Experimental</SelectItem>
+                      <SelectItem value="Starter">Starter</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <div className="grid gap-4 md:grid-cols-2">
