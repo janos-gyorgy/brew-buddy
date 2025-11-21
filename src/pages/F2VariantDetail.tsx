@@ -27,6 +27,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { format } from "date-fns";
+import { tastingNotesSchema } from "@/lib/validationSchemas";
+import { z } from "zod";
 
 type F2Status = Database["public"]["Enums"]["f2_status"];
 
@@ -39,6 +41,7 @@ const F2VariantDetail = () => {
     tasting_rating: "",
     tasting_notes: "",
   });
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const { data: variant, isLoading } = useQuery({
     queryKey: ["f2-variant", id],
@@ -113,10 +116,29 @@ const F2VariantDetail = () => {
   };
 
   const handleSaveNotes = () => {
-    updateNotesMutation.mutate({
-      tasting_rating: notesFormData.tasting_rating ? parseInt(notesFormData.tasting_rating) : null,
-      tasting_notes: notesFormData.tasting_notes || null,
-    });
+    // Validate form data
+    try {
+      const validatedData = tastingNotesSchema.parse({
+        tasting_rating: notesFormData.tasting_rating ? parseInt(notesFormData.tasting_rating) : undefined,
+        tasting_notes: notesFormData.tasting_notes || undefined,
+      });
+      setValidationErrors({});
+      updateNotesMutation.mutate({
+        tasting_rating: notesFormData.tasting_rating ? parseInt(notesFormData.tasting_rating) : null,
+        tasting_notes: notesFormData.tasting_notes || null,
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errors: Record<string, string> = {};
+        error.errors.forEach((err) => {
+          if (err.path[0]) {
+            errors[err.path[0].toString()] = err.message;
+          }
+        });
+        setValidationErrors(errors);
+        toast.error('Please fix the validation errors');
+      }
+    }
   };
 
   if (isLoading) {
