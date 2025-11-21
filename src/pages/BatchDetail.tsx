@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import type { Database } from "@/integrations/supabase/types";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,7 @@ const BatchDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [logDialogOpen, setLogDialogOpen] = useState(false);
   const [f2DialogOpen, setF2DialogOpen] = useState(false);
 
@@ -110,6 +112,7 @@ const BatchDetail = () => {
       const { error } = await supabase.from("fermentation_log_entries").insert([
         {
           batch_id: id,
+          user_id: user?.id,
           phase: data.phase as "f1" | "f2" | "cold_crash" | "storage",
           ph: data.ph ? parseFloat(data.ph) : null,
           brix: data.brix ? parseFloat(data.brix) : null,
@@ -147,6 +150,7 @@ const BatchDetail = () => {
       const { error } = await supabase.from("f2_variant_batches").insert([
         {
           parent_batch_id: id,
+          user_id: user?.id,
           name: data.name,
           bottle_count: parseInt(data.bottle_count),
           bottle_size_liters: parseFloat(data.bottle_size_liters),
