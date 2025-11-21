@@ -12,6 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { Loader2, Save, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
+import { batchSchema } from "@/lib/validationSchemas";
+import { z } from "zod";
 
 const BatchForm = () => {
   const { id } = useParams();
@@ -37,6 +39,8 @@ const BatchForm = () => {
     scoby_info: "",
     general_notes: "",
   });
+
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const { data: recipes } = useQuery({
     queryKey: ["recipes"],
@@ -167,7 +171,30 @@ const BatchForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    saveMutation.mutate(formData);
+    
+    // Validate form data
+    try {
+      const validatedData = batchSchema.parse({
+        ...formData,
+        total_volume_liters: parseFloat(formData.total_volume_liters),
+        initial_ph: formData.initial_ph ? parseFloat(formData.initial_ph) : undefined,
+        initial_brix: formData.initial_brix ? parseFloat(formData.initial_brix) : undefined,
+        ambient_temperature_c: formData.ambient_temperature_c ? parseFloat(formData.ambient_temperature_c) : undefined,
+      });
+      setValidationErrors({});
+      saveMutation.mutate(formData);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errors: Record<string, string> = {};
+        error.errors.forEach((err) => {
+          if (err.path[0]) {
+            errors[err.path[0].toString()] = err.message;
+          }
+        });
+        setValidationErrors(errors);
+        toast.error('Please fix the validation errors');
+      }
+    }
   };
 
   const handleChange = (field: string, value: string) => {
