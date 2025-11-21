@@ -11,6 +11,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Loader2, Save, ArrowLeft } from "lucide-react";
+import { recipeSchema } from "@/lib/validationSchemas";
+import { z } from "zod";
 
 const RecipeForm = () => {
   const { id } = useParams();
@@ -41,6 +43,8 @@ const RecipeForm = () => {
     f2_sugar_or_juice_guidelines: "",
     notes: "",
   });
+
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const { data: recipe, isLoading } = useQuery({
     queryKey: ["recipe", id],
@@ -119,7 +123,34 @@ const RecipeForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    saveMutation.mutate(formData);
+    
+    // Validate form data
+    try {
+      const validatedData = recipeSchema.parse({
+        ...formData,
+        batch_size_liters: formData.batch_size_liters ? parseFloat(formData.batch_size_liters) : undefined,
+        tea_amount_g_per_liter: formData.tea_amount_g_per_liter ? parseFloat(formData.tea_amount_g_per_liter) : undefined,
+        steep_temperature_c: formData.steep_temperature_c ? parseFloat(formData.steep_temperature_c) : undefined,
+        steep_time_minutes: formData.steep_time_minutes ? parseInt(formData.steep_time_minutes) : undefined,
+        sugar_g_per_liter: formData.sugar_g_per_liter ? parseFloat(formData.sugar_g_per_liter) : undefined,
+        starter_percentage: formData.starter_percentage ? parseFloat(formData.starter_percentage) : undefined,
+        target_f1_days_min: formData.target_f1_days_min ? parseInt(formData.target_f1_days_min) : undefined,
+        target_f1_days_max: formData.target_f1_days_max ? parseInt(formData.target_f1_days_max) : undefined,
+      });
+      setValidationErrors({});
+      saveMutation.mutate(formData);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errors: Record<string, string> = {};
+        error.errors.forEach((err) => {
+          if (err.path[0]) {
+            errors[err.path[0].toString()] = err.message;
+          }
+        });
+        setValidationErrors(errors);
+        toast.error('Please fix the validation errors');
+      }
+    }
   };
 
   const handleChange = (field: string, value: string) => {
