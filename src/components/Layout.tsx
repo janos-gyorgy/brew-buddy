@@ -1,9 +1,20 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Beaker, FlaskConical, TestTubes, LayoutDashboard, BookOpen } from "lucide-react";
+import { Beaker, FlaskConical, TestTubes, LayoutDashboard, BookOpen, LogOut } from "lucide-react";
+import { Button } from "./ui/button";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { signOut, user } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success('Signed out successfully');
+    navigate('/auth');
+  };
 
   const navItems = [
     { path: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -21,7 +32,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               <Beaker className="h-8 w-8 text-primary" />
               <h1 className="text-2xl font-bold text-foreground">Brew Buddy</h1>
             </div>
-            <nav className="hidden md:flex gap-6">
+            <div className="flex items-center gap-4">
+              <nav className="hidden md:flex gap-6">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path;
@@ -41,7 +53,19 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                   </Link>
                 );
               })}
-            </nav>
+              </nav>
+              {user && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleSignOut}
+                  className="hidden md:flex items-center gap-2"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sign Out
+                </Button>
+              )}
+            </div>
           </div>
           <nav className="md:hidden flex gap-2 mt-4 overflow-x-auto pb-2">
             {navItems.map((item) => {
@@ -61,11 +85,22 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                   <Icon className="h-4 w-4" />
                   {item.label}
                 </Link>
-              );
-            })}
-          </nav>
-        </div>
-      </header>
+                );
+              })}
+            </nav>
+            {user && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleSignOut}
+                className="md:hidden flex items-center gap-2 ml-2"
+              >
+                <LogOut className="h-4 w-4" />
+                Sign Out
+              </Button>
+            )}
+          </div>
+        </header>
       <main className="container mx-auto px-4 py-6">{children}</main>
     </div>
   );
