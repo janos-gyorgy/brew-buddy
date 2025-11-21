@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,7 @@ const BatchForm = () => {
   const recipeId = searchParams.get("recipe");
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const isEdit = !!id;
 
   const [formData, setFormData] = useState({
@@ -154,7 +156,7 @@ const BatchForm = () => {
         const { error } = await supabase.from("batches").update(payload).eq("id", id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("batches").insert([payload]);
+        const { error } = await supabase.from("batches").insert([{ ...payload, user_id: user?.id }]);
         if (error) throw error;
       }
     },

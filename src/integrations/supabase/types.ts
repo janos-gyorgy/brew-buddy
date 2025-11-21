@@ -31,6 +31,7 @@ export type Database = {
           target_ready_date_f1: string | null
           total_volume_liters: number
           updated_at: string
+          user_id: string | null
           vessel_location: string | null
           vessel_type: string | null
         }
@@ -50,6 +51,7 @@ export type Database = {
           target_ready_date_f1?: string | null
           total_volume_liters: number
           updated_at?: string
+          user_id?: string | null
           vessel_location?: string | null
           vessel_type?: string | null
         }
@@ -69,6 +71,7 @@ export type Database = {
           target_ready_date_f1?: string | null
           total_volume_liters?: number
           updated_at?: string
+          user_id?: string | null
           vessel_location?: string | null
           vessel_type?: string | null
         }
@@ -100,6 +103,7 @@ export type Database = {
           tasting_notes: string | null
           tasting_rating: number | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           bottle_count: number
@@ -118,6 +122,7 @@ export type Database = {
           tasting_notes?: string | null
           tasting_rating?: number | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           bottle_count?: number
@@ -136,6 +141,7 @@ export type Database = {
           tasting_notes?: string | null
           tasting_rating?: number | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -161,6 +167,7 @@ export type Database = {
           taste_notes: string | null
           temperature_c: number | null
           timestamp: string
+          user_id: string | null
         }
         Insert: {
           actions?: string | null
@@ -175,6 +182,7 @@ export type Database = {
           taste_notes?: string | null
           temperature_c?: number | null
           timestamp?: string
+          user_id?: string | null
         }
         Update: {
           actions?: string | null
@@ -189,6 +197,7 @@ export type Database = {
           taste_notes?: string | null
           temperature_c?: number | null
           timestamp?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -226,6 +235,7 @@ export type Database = {
           tea_amount_g_per_liter: number | null
           tea_blend_description: string | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           batch_size_liters?: number | null
@@ -252,6 +262,7 @@ export type Database = {
           tea_amount_g_per_liter?: number | null
           tea_blend_description?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           batch_size_liters?: number | null
@@ -278,6 +289,7 @@ export type Database = {
           tea_amount_g_per_liter?: number | null
           tea_blend_description?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -294,6 +306,7 @@ export type Database = {
           sugar_g_per_liter: number | null
           tea_blend_description: string | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -307,6 +320,7 @@ export type Database = {
           sugar_g_per_liter?: number | null
           tea_blend_description?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -320,6 +334,7 @@ export type Database = {
           sugar_g_per_liter?: number | null
           tea_blend_description?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
