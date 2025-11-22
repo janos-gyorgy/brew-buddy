@@ -95,21 +95,43 @@ export default function Auth() {
       return;
     }
 
+    // Wait for session to be established
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
     // Populate demo data
-    toast.loading('Setting up demo data...');
+    const loadingToast = toast.loading('Setting up demo data...');
     try {
       const { supabase } = await import('@/integrations/supabase/client');
-      const { error: demoError } = await supabase.functions.invoke('populate-demo-data');
+      
+      // Get current session to ensure auth is ready
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        console.error('No session available after login');
+        toast.dismiss(loadingToast);
+        setLoading(false);
+        toast.success('Signed in! Please wait a moment...');
+        navigate('/');
+        return;
+      }
+
+      const { data, error: demoError } = await supabase.functions.invoke('populate-demo-data', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
+      });
       
       if (demoError) {
         console.error('Demo data error:', demoError);
+      } else {
+        console.log('Demo data result:', data);
       }
     } catch (err) {
       console.error('Failed to populate demo data:', err);
     }
     
+    toast.dismiss(loadingToast);
     setLoading(false);
-    toast.dismiss();
     toast.success('Welcome to the demo account!');
     navigate('/');
   };
