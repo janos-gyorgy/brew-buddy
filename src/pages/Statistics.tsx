@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2, BookOpen, FlaskConical, TestTubes, TrendingUp, Award, Calendar } from "lucide-react";
 import Layout from "@/components/Layout";
 import { Badge } from "@/components/ui/badge";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 const Statistics = () => {
   const { data: stats, isLoading } = useQuery({
@@ -41,6 +42,29 @@ const Statistics = () => {
         return acc;
       }, {} as Record<string, number>);
 
+      // Calculate volume over time
+      const volumeOverTime = batches.data
+        ?.filter((b) => b.start_date && b.total_volume_liters)
+        .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
+        .reduce((acc, batch) => {
+          const date = new Date(batch.start_date).toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short' 
+          });
+          const existingEntry = acc.find((entry) => entry.date === date);
+          if (existingEntry) {
+            existingEntry.volume += batch.total_volume_liters;
+          } else {
+            const previousVolume = acc.length > 0 ? acc[acc.length - 1].cumulative : 0;
+            acc.push({
+              date,
+              volume: batch.total_volume_liters,
+              cumulative: previousVolume + batch.total_volume_liters,
+            });
+          }
+          return acc;
+        }, [] as { date: string; volume: number; cumulative: number }[]) || [];
+
       return {
         totalRecipes,
         totalBatches,
@@ -53,6 +77,7 @@ const Statistics = () => {
         totalVolume,
         topRatedVariants,
         batchesByStatus,
+        volumeOverTime,
       };
     },
   });
@@ -170,6 +195,51 @@ const Statistics = () => {
             </div>
           </CardContent>
         </Card>
+
+        {stats?.volumeOverTime && stats.volumeOverTime.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                Brewing Volume Over Time
+              </CardTitle>
+              <CardDescription>Cumulative liters brewed by month</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={stats.volumeOverTime}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis 
+                    dataKey="date" 
+                    className="text-xs text-muted-foreground"
+                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  />
+                  <YAxis 
+                    className="text-xs text-muted-foreground"
+                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                    label={{ value: 'Liters', angle: -90, position: 'insideLeft', fill: 'hsl(var(--muted-foreground))' }}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '6px',
+                    }}
+                    labelStyle={{ color: 'hsl(var(--foreground))' }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="cumulative" 
+                    stroke="hsl(var(--primary))" 
+                    strokeWidth={2}
+                    name="Total Liters"
+                    dot={{ fill: 'hsl(var(--primary))' }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        )}
 
         {stats?.topRatedVariants && stats.topRatedVariants.length > 0 && (
           <Card>
