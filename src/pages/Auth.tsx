@@ -88,14 +88,30 @@ export default function Auth() {
     
     // Then sign in
     const { error } = await signIn('demo@brewbuddy.com', 'demo123456');
-    setLoading(false);
-
+    
     if (error) {
+      setLoading(false);
       toast.error('Could not access demo account. Please try again.');
-    } else {
-      toast.success('Welcome to the demo account!');
-      navigate('/');
+      return;
     }
+
+    // Populate demo data
+    toast.loading('Setting up demo data...');
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { error: demoError } = await supabase.functions.invoke('populate-demo-data');
+      
+      if (demoError) {
+        console.error('Demo data error:', demoError);
+      }
+    } catch (err) {
+      console.error('Failed to populate demo data:', err);
+    }
+    
+    setLoading(false);
+    toast.dismiss();
+    toast.success('Welcome to the demo account!');
+    navigate('/');
   };
 
   return (
