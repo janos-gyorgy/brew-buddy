@@ -80,6 +80,24 @@ export default function Auth() {
     }
   };
 
+  const handleDemoLogin = async () => {
+    setLoading(true);
+    
+    // Try to sign up first (will fail if account exists)
+    await signUp('demo@brewbuddy.com', 'demo123456');
+    
+    // Then sign in
+    const { error } = await signIn('demo@brewbuddy.com', 'demo123456');
+    setLoading(false);
+
+    if (error) {
+      toast.error('Could not access demo account. Please try again.');
+    } else {
+      toast.success('Welcome to the demo account!');
+      navigate('/');
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
@@ -88,6 +106,19 @@ export default function Auth() {
           <CardDescription>Sign in or create an account to manage your brewing</CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="mb-4">
+            <Button 
+              onClick={handleDemoLogin} 
+              variant="outline" 
+              className="w-full"
+              disabled={loading}
+            >
+              {loading ? 'Loading...' : '🍺 Try Demo Account'}
+            </Button>
+            <p className="text-xs text-muted-foreground text-center mt-2">
+              Explore with pre-filled recipes and batches
+            </p>
+          </div>
           <Tabs defaultValue="signin">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Sign In</TabsTrigger>

@@ -156,8 +156,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     { path: "/", label: "Dashboard", icon: LayoutDashboard },
     { path: "/recipes", label: "Recipes", icon: BookOpen },
     { path: "/batches", label: "Batches", icon: FlaskConical },
-    { path: "/f2-variants", label: "F2 Variants", icon: TestTubes },
-    { path: "/statistics", label: "Statistics", icon: BarChart3 },
+    { path: "/f2-variants", label: "F2", icon: TestTubes },
+    { path: "/statistics", label: "Stats", icon: BarChart3 },
   ];
 
   return (
