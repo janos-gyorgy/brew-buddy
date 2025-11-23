@@ -83,6 +83,26 @@ const BatchForm = () => {
     enabled: isEdit,
   });
 
+  // Auto-generate batch code when recipe changes
+  useEffect(() => {
+    if (selectedRecipe && !isEdit && !formData.batch_code) {
+      const generateBatchCode = async () => {
+        const { data: existingBatches } = await supabase
+          .from("batches")
+          .select("id")
+          .eq("recipe_id", selectedRecipe.id);
+        
+        const batchNumber = (existingBatches?.length || 0) + 1;
+        const dateStr = format(new Date(formData.start_date), "yyyy-MM-dd");
+        const code = `${dateStr}-${selectedRecipe.name.substring(0, 3).toUpperCase()}-${batchNumber}`;
+        
+        setFormData(prev => ({ ...prev, batch_code: code }));
+      };
+      
+      generateBatchCode();
+    }
+  }, [selectedRecipe, formData.start_date, isEdit]);
+
   useEffect(() => {
     if (batch) {
       setFormData({
