@@ -12,7 +12,7 @@ const Statistics = () => {
     queryFn: async () => {
       const [recipes, batches, f2Variants, fermentationLogs] = await Promise.all([
         supabase.from("recipes").select("*"),
-        supabase.from("batches").select("*"),
+        supabase.from("batches").select("*, recipes(intent_or_mood)"),
         supabase.from("f2_variant_batches").select("*"),
         supabase.from("fermentation_log_entries").select("*"),
       ]);
@@ -30,7 +30,11 @@ const Statistics = () => {
       const failedBatches = batches.data?.filter((b) => b.status === "failed").length || 0;
       const successRate = totalBatches > 0 ? ((finishedBatches / totalBatches) * 100).toFixed(1) : "0";
 
-      const totalVolume = batches.data?.reduce((sum, b) => sum + (b.total_volume_liters || 0), 0) || 0;
+      // Exclude starter batches from volume calculation
+      const totalVolume = batches.data?.reduce((sum, b) => {
+        const isStarter = b.recipes?.intent_or_mood?.toLowerCase().includes('starter');
+        return sum + (isStarter ? 0 : (b.total_volume_liters || 0));
+      }, 0) || 0;
 
       const topRatedVariants = f2Variants.data
         ?.filter((v) => v.tasting_rating !== null)
