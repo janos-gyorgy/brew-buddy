@@ -26,6 +26,7 @@ const RecipeForm = () => {
     name: "",
     description: "",
     intent_or_mood: "",
+    element: "",
     batch_size_liters: "",
     tea_blend_description: "",
     tea_amount_g_per_liter: "",
@@ -68,6 +69,7 @@ const RecipeForm = () => {
         name: recipe.name || "",
         description: recipe.description || "",
         intent_or_mood: recipe.intent_or_mood || "",
+        element: recipe.element || "",
         batch_size_liters: recipe.batch_size_liters?.toString() || "",
         tea_blend_description: recipe.tea_blend_description || "",
         tea_amount_g_per_liter: recipe.tea_amount_g_per_liter?.toString() || "",
@@ -216,16 +218,27 @@ const RecipeForm = () => {
                   </Select>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="batch_size_liters">Batch Size (Liters)</Label>
-                <Input
-                  id="batch_size_liters"
-                  type="number"
-                  step="0.1"
-                  value={formData.batch_size_liters}
-                  onChange={(e) => handleChange("batch_size_liters", e.target.value)}
-                  placeholder="5.0"
-                />
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="element">Element</Label>
+                  <Input
+                    id="element"
+                    value={formData.element}
+                    onChange={(e) => handleChange("element", e.target.value)}
+                    placeholder="Earth, Air, Fire, Water"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="batch_size_liters">Batch Size (Liters)</Label>
+                  <Input
+                    id="batch_size_liters"
+                    type="number"
+                    step="0.1"
+                    value={formData.batch_size_liters}
+                    onChange={(e) => handleChange("batch_size_liters", e.target.value)}
+                    placeholder="5.0"
+                  />
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>

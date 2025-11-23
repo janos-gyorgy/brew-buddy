@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Wine, FlaskConical, TestTubes, LayoutDashboard, BookOpen, LogOut, User, Download, BarChart3, Lock, Droplets, Beaker } from "lucide-react";
+import { Wine, FlaskConical, TestTubes, LayoutDashboard, BookOpen, LogOut, User, Download, BarChart3, Lock } from "lucide-react";
 import { Button } from "./ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -155,9 +155,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const navItems = [
     { path: "/", label: "Dashboard", icon: LayoutDashboard },
     { path: "/recipes", label: "Recipes", icon: BookOpen },
-    { path: "/batches", label: "Batches", icon: Beaker },
+    { path: "/batches", label: "Batches", icon: FlaskConical },
     { path: "/f2-variants", label: "F2", icon: TestTubes },
-    { path: "/starter", label: "Starter", icon: Droplets },
     { path: "/statistics", label: "Stats", icon: BarChart3 },
   ];
 

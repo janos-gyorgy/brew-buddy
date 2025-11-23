@@ -66,7 +66,8 @@ Deno.serve(async (req) => {
           target_f1_days_max: 10,
           target_ph_range: '2.5-3.5',
           target_brix_range: '5-8 Brix',
-          intent_or_mood: 'Energizing',
+          intent_or_mood: 'Energizing, Clean',
+          element: 'Wood',
           f2_fruit_ideas: 'Peach, Mango, Ginger',
           f2_herb_spice_ideas: 'Mint, Lavender',
           notes: 'Great starter recipe'
@@ -87,7 +88,8 @@ Deno.serve(async (req) => {
           target_f1_days_max: 8,
           target_ph_range: '2.5-3.2',
           target_brix_range: '6-9 Brix',
-          intent_or_mood: 'Grounding',
+          intent_or_mood: 'Grounding, Robust',
+          element: 'Earth',
           f2_fruit_ideas: 'Blackberry, Cherry, Lemon',
           f2_herb_spice_ideas: 'Cinnamon, Star anise, Cardamom',
           notes: 'Ferments faster than green tea'
@@ -108,7 +110,8 @@ Deno.serve(async (req) => {
           target_f1_days_max: 12,
           target_ph_range: '2.8-3.5',
           target_brix_range: '4-7 Brix',
-          intent_or_mood: 'Uplifting',
+          intent_or_mood: 'Uplifting, Joyful',
+          element: 'Fire',
           f2_fruit_ideas: 'Pineapple, Passionfruit, Coconut',
           f2_herb_spice_ideas: 'Thai basil, Lemongrass',
           notes: 'Lower sugar for lighter finish'
