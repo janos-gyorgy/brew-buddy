@@ -2,15 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Loader2, AlertCircle, Droplets, TestTube, Bell, Database } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import { format, isPast, isToday, differenceInDays } from "date-fns";
+import { Loader2, AlertCircle, Droplets, TestTube } from "lucide-react";
+import { Link } from "react-router-dom";
+import { format, isPast, isToday } from "date-fns";
 import Layout from "@/components/Layout";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const Dashboard = () => {
-  const navigate = useNavigate();
   const { data: activeBatches, isLoading: batchesLoading } = useQuery({
     queryKey: ["active-batches"],
     queryFn: async () => {
@@ -66,76 +63,13 @@ const Dashboard = () => {
     );
   }
 
-  // Calculate alerts for due dates
-  const alerts = [];
-  
-  activeBatches?.forEach((batch) => {
-    if (batch.target_ready_date_f1) {
-      const daysUntil = differenceInDays(new Date(batch.target_ready_date_f1), new Date());
-      if (daysUntil <= 0) {
-        alerts.push({
-          type: 'batch',
-          message: `Batch ${batch.batch_code} is ready for F2!`,
-          link: `/batches/${batch.id}`
-        });
-      } else if (daysUntil <= 2) {
-        alerts.push({
-          type: 'batch',
-          message: `Batch ${batch.batch_code} ready in ${daysUntil} day${daysUntil !== 1 ? 's' : ''}`,
-          link: `/batches/${batch.id}`
-        });
-      }
-    }
-  });
-
-  activeF2Variants?.forEach((variant) => {
-    if (variant.expected_ready_date_f2) {
-      const daysUntil = differenceInDays(new Date(variant.expected_ready_date_f2), new Date());
-      if (daysUntil <= 0) {
-        alerts.push({
-          type: 'f2',
-          message: `F2 ${variant.name} is ready!`,
-          link: `/f2-variants/${variant.id}`
-        });
-      } else if (daysUntil <= 2) {
-        alerts.push({
-          type: 'f2',
-          message: `F2 ${variant.name} ready in ${daysUntil} day${daysUntil !== 1 ? 's' : ''}`,
-          link: `/f2-variants/${variant.id}`
-        });
-      }
-    }
-  });
-
   return (
     <Layout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-3xl font-bold text-foreground">Dashboard</h2>
-            <p className="text-muted-foreground">Active batches and action items</p>
-          </div>
-          <Button onClick={() => navigate("/demo-data")} variant="outline">
-            <Database className="h-4 w-4 mr-2" />
-            Load Demo Data
-          </Button>
+        <div>
+          <h2 className="text-3xl font-bold text-foreground">Dashboard</h2>
+          <p className="text-muted-foreground">Active batches and action items</p>
         </div>
-
-        {alerts.length > 0 && (
-          <Alert>
-            <Bell className="h-4 w-4" />
-            <AlertTitle>Attention Needed</AlertTitle>
-            <AlertDescription>
-              <div className="space-y-1 mt-2">
-                {alerts.map((alert, idx) => (
-                  <Link key={idx} to={alert.link} className="block hover:underline">
-                    • {alert.message}
-                  </Link>
-                ))}
-              </div>
-            </AlertDescription>
-          </Alert>
-        )}
 
         <div className="grid gap-6 md:grid-cols-2">
           <Card>
