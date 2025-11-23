@@ -18,6 +18,7 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import Statistics from "./pages/Statistics";
 import Starter from "./pages/Starter";
+import DemoData from "./pages/DemoData";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,7 @@ const App = () => (
             <Route path="/f2-variants/:id" element={<ProtectedRoute><F2VariantDetail /></ProtectedRoute>} />
             <Route path="/starter" element={<ProtectedRoute><Starter /></ProtectedRoute>} />
             <Route path="/statistics" element={<ProtectedRoute><Statistics /></ProtectedRoute>} />
+            <Route path="/demo-data" element={<ProtectedRoute><DemoData /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
