@@ -58,7 +58,16 @@ const Recipes = () => {
                       <BookOpen className="h-5 w-5 text-primary flex-shrink-0" />
                     </div>
                     {recipe.intent_or_mood && (
-                      <Badge variant="secondary" className="w-fit">
+                      <Badge 
+                        variant="secondary" 
+                        className={`w-fit ${
+                          recipe.intent_or_mood === 'Speciality' ? 'bg-purple-500/20 text-purple-700 dark:text-purple-300' :
+                          recipe.intent_or_mood === 'Starter' ? 'bg-green-500/20 text-green-700 dark:text-green-300' :
+                          recipe.intent_or_mood === 'Seasonal' ? 'bg-orange-500/20 text-orange-700 dark:text-orange-300' :
+                          recipe.intent_or_mood === 'Signature' ? 'bg-blue-500/20 text-blue-700 dark:text-blue-300' :
+                          'bg-pink-500/20 text-pink-700 dark:text-pink-300'
+                        }`}
+                      >
                         {recipe.intent_or_mood}
                       </Badge>
                     )}
