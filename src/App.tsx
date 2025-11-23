@@ -17,6 +17,7 @@ import F2VariantDetail from "./pages/F2VariantDetail";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import Statistics from "./pages/Statistics";
+import Starter from "./pages/Starter";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/batches/:id/edit" element={<ProtectedRoute><BatchForm /></ProtectedRoute>} />
             <Route path="/f2-variants" element={<ProtectedRoute><F2Variants /></ProtectedRoute>} />
             <Route path="/f2-variants/:id" element={<ProtectedRoute><F2VariantDetail /></ProtectedRoute>} />
+            <Route path="/starter" element={<ProtectedRoute><Starter /></ProtectedRoute>} />
             <Route path="/statistics" element={<ProtectedRoute><Statistics /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

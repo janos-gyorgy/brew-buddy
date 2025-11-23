@@ -152,16 +152,27 @@ const RecipeDetail = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
-              {recipe.element && (
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Element</p>
-                  <p className="text-foreground">{recipe.element}</p>
-                </div>
-              )}
               {recipe.batch_size_liters && (
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Batch Size</p>
                   <p className="text-foreground">{recipe.batch_size_liters}L</p>
+                </div>
+              )}
+              {recipe.intent_or_mood && (
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Type</p>
+                  <Badge 
+                    variant="secondary" 
+                    className={`${
+                      recipe.intent_or_mood === 'Speciality' ? 'bg-purple-500/20 text-purple-700 dark:text-purple-300' :
+                      recipe.intent_or_mood === 'Starter' ? 'bg-green-500/20 text-green-700 dark:text-green-300' :
+                      recipe.intent_or_mood === 'Seasonal' ? 'bg-orange-500/20 text-orange-700 dark:text-orange-300' :
+                      recipe.intent_or_mood === 'Signature' ? 'bg-blue-500/20 text-blue-700 dark:text-blue-300' :
+                      'bg-pink-500/20 text-pink-700 dark:text-pink-300'
+                    }`}
+                  >
+                    {recipe.intent_or_mood}
+                  </Badge>
                 </div>
               )}
             </div>
