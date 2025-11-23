@@ -2,14 +2,15 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, AlertCircle, Droplets, TestTube, Bell } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Loader2, AlertCircle, Droplets, TestTube, Bell, Database } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { format, isPast, isToday, differenceInDays } from "date-fns";
 import Layout from "@/components/Layout";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useEffect } from "react";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const { data: activeBatches, isLoading: batchesLoading } = useQuery({
     queryKey: ["active-batches"],
     queryFn: async () => {
@@ -109,9 +110,15 @@ const Dashboard = () => {
   return (
     <Layout>
       <div className="space-y-6">
-        <div>
-          <h2 className="text-3xl font-bold text-foreground">Dashboard</h2>
-          <p className="text-muted-foreground">Active batches and action items</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-bold text-foreground">Dashboard</h2>
+            <p className="text-muted-foreground">Active batches and action items</p>
+          </div>
+          <Button onClick={() => navigate("/demo-data")} variant="outline">
+            <Database className="h-4 w-4 mr-2" />
+            Load Demo Data
+          </Button>
         </div>
 
         {alerts.length > 0 && (
