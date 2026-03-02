@@ -152,10 +152,10 @@ const RecipeDetail = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
-              {recipe.element && (
+              {(recipe as any).element && (
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Element</p>
-                  <p className="text-foreground">{recipe.element}</p>
+                  <p className="text-foreground">{(recipe as any).element}</p>
                 </div>
               )}
               {recipe.batch_size_liters && (

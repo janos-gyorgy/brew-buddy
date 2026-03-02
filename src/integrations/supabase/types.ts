@@ -214,7 +214,6 @@ export type Database = {
           batch_size_liters: number | null
           created_at: string
           description: string | null
-          element: string | null
           f2_fruit_ideas: string | null
           f2_herb_spice_ideas: string | null
           f2_sugar_or_juice_guidelines: string | null
@@ -241,7 +240,6 @@ export type Database = {
           batch_size_liters?: number | null
           created_at?: string
           description?: string | null
-          element?: string | null
           f2_fruit_ideas?: string | null
           f2_herb_spice_ideas?: string | null
           f2_sugar_or_juice_guidelines?: string | null
@@ -268,7 +266,6 @@ export type Database = {
           batch_size_liters?: number | null
           created_at?: string
           description?: string | null
-          element?: string | null
           f2_fruit_ideas?: string | null
           f2_herb_spice_ideas?: string | null
           f2_sugar_or_juice_guidelines?: string | null

@@ -5,7 +5,7 @@ export const recipeSchema = z.object({
   name: z.string().trim().min(1, 'Name is required').max(200, 'Name must be less than 200 characters'),
   description: z.string().max(2000, 'Description must be less than 2000 characters').optional(),
   intent_or_mood: z.string().max(100).optional(),
-  element: z.string().max(100).optional(),
+  
   batch_size_liters: z.number().positive('Must be positive').max(10000).optional(),
   tea_blend_description: z.string().max(500).optional(),
   tea_amount_g_per_liter: z.number().positive('Must be positive').max(1000).optional(),
