@@ -69,7 +69,7 @@ const RecipeForm = () => {
         name: recipe.name || "",
         description: recipe.description || "",
         intent_or_mood: recipe.intent_or_mood || "",
-        element: recipe.element || "",
+        element: "",
         batch_size_liters: recipe.batch_size_liters?.toString() || "",
         tea_blend_description: recipe.tea_blend_description || "",
         tea_amount_g_per_liter: recipe.tea_amount_g_per_liter?.toString() || "",
@@ -93,9 +93,10 @@ const RecipeForm = () => {
 
   const saveMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
+      const { element, ...rest } = data;
       const payload = {
-        ...data,
-        batch_size_liters: data.batch_size_liters ? parseFloat(data.batch_size_liters) : null,
+        ...rest,
+        batch_size_liters: rest.batch_size_liters ? parseFloat(rest.batch_size_liters) : null,
         tea_amount_g_per_liter: data.tea_amount_g_per_liter ? parseFloat(data.tea_amount_g_per_liter) : null,
         steep_temperature_c: data.steep_temperature_c ? parseFloat(data.steep_temperature_c) : null,
         steep_time_minutes: data.steep_time_minutes ? parseInt(data.steep_time_minutes) : null,
