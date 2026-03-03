@@ -212,6 +212,11 @@ export type Database = {
       recipes: {
         Row: {
           batch_size_liters: number | null
+          botanical_amount_g: number | null
+          botanical_name: string | null
+          botanical_steep_minutes: number | null
+          botanical_temp_c: number | null
+          botanical_water_ml: number | null
           created_at: string
           description: string | null
           f2_fruit_ideas: string | null
@@ -238,6 +243,11 @@ export type Database = {
         }
         Insert: {
           batch_size_liters?: number | null
+          botanical_amount_g?: number | null
+          botanical_name?: string | null
+          botanical_steep_minutes?: number | null
+          botanical_temp_c?: number | null
+          botanical_water_ml?: number | null
           created_at?: string
           description?: string | null
           f2_fruit_ideas?: string | null
@@ -264,6 +274,11 @@ export type Database = {
         }
         Update: {
           batch_size_liters?: number | null
+          botanical_amount_g?: number | null
+          botanical_name?: string | null
+          botanical_steep_minutes?: number | null
+          botanical_temp_c?: number | null
+          botanical_water_ml?: number | null
           created_at?: string
           description?: string | null
           f2_fruit_ideas?: string | null

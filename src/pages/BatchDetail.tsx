@@ -63,7 +63,6 @@ const BatchDetail = () => {
     fruits_and_juices: "",
     herbs_and_spices: "",
     other_additives: "",
-    priming_sugar_g_per_bottle: "",
     f2_start_date: format(new Date(), "yyyy-MM-dd"),
     expected_ready_date_f2: "",
   });
@@ -157,7 +156,6 @@ const BatchDetail = () => {
           fruits_and_juices: data.fruits_and_juices || null,
           herbs_and_spices: data.herbs_and_spices || null,
           other_additives: data.other_additives || null,
-          priming_sugar_g_per_bottle: data.priming_sugar_g_per_bottle ? parseFloat(data.priming_sugar_g_per_bottle) : null,
           f2_start_date: data.f2_start_date,
           expected_ready_date_f2: data.expected_ready_date_f2 || null,
         },
@@ -176,7 +174,6 @@ const BatchDetail = () => {
         fruits_and_juices: "",
         herbs_and_spices: "",
         other_additives: "",
-        priming_sugar_g_per_bottle: "",
         f2_start_date: format(new Date(), "yyyy-MM-dd"),
         expected_ready_date_f2: "",
       });
@@ -629,16 +626,6 @@ const BatchDetail = () => {
                           value={f2FormData.bottle_size_liters}
                           onChange={(e) => setF2FormData({ ...f2FormData, bottle_size_liters: e.target.value })}
                           required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Sugar/Bottle (g)</Label>
-                        <Input
-                          type="number"
-                          step="0.1"
-                          value={f2FormData.priming_sugar_g_per_bottle}
-                          onChange={(e) => setF2FormData({ ...f2FormData, priming_sugar_g_per_bottle: e.target.value })}
-                          placeholder="2.0"
                         />
                       </div>
                     </div>
