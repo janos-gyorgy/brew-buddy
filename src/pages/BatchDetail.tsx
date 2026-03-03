@@ -156,7 +156,6 @@ const BatchDetail = () => {
           fruits_and_juices: data.fruits_and_juices || null,
           herbs_and_spices: data.herbs_and_spices || null,
           other_additives: data.other_additives || null,
-          priming_sugar_g_per_bottle: data.priming_sugar_g_per_bottle ? parseFloat(data.priming_sugar_g_per_bottle) : null,
           f2_start_date: data.f2_start_date,
           expected_ready_date_f2: data.expected_ready_date_f2 || null,
         },
