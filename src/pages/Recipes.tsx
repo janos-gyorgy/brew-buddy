@@ -39,12 +39,20 @@ const Recipes = () => {
             <h2 className="text-3xl font-bold text-foreground">Recipes</h2>
             <p className="text-muted-foreground">Your kombucha recipe templates</p>
           </div>
-          <Button asChild>
-            <Link to="/recipes/new">
-              <Plus className="h-4 w-4 mr-2" />
-              New Recipe
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" asChild>
+              <Link to="/recipes/botanicals">
+                <Leaf className="h-4 w-4 mr-2" />
+                Botanicals
+              </Link>
+            </Button>
+            <Button asChild>
+              <Link to="/recipes/new">
+                <Plus className="h-4 w-4 mr-2" />
+                New Recipe
+              </Link>
+            </Button>
+          </div>
         </div>
 
         {recipes && recipes.length > 0 ? (
