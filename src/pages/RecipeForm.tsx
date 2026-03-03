@@ -88,7 +88,6 @@ const RecipeForm = () => {
         f2_herb_spice_ideas: recipe.f2_herb_spice_ideas || "",
         f2_sugar_or_juice_guidelines: recipe.f2_sugar_or_juice_guidelines || "",
         notes: recipe.notes || "",
-        notes: recipe.notes || "",
       });
     }
   }, [recipe]);
