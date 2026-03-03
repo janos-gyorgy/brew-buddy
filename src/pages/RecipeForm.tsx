@@ -288,34 +288,104 @@ const RecipeForm = () => {
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="space-y-2">
                   <Label htmlFor="tea_amount_g_per_liter">Tea (g/L)</Label>
-                  <Input
+                  <DefaultInput
                     id="tea_amount_g_per_liter"
                     type="number"
                     step="0.1"
                     value={formData.tea_amount_g_per_liter}
                     onChange={(e) => handleChange("tea_amount_g_per_liter", e.target.value)}
-                    placeholder="8.0"
+                    onValueChange={(v) => handleChange("tea_amount_g_per_liter", v)}
+                    defaultFillValue="8.0"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="steep_temperature_c">Steep Temp (°C)</Label>
-                  <Input
+                  <DefaultInput
                     id="steep_temperature_c"
                     type="number"
                     step="0.1"
                     value={formData.steep_temperature_c}
                     onChange={(e) => handleChange("steep_temperature_c", e.target.value)}
-                    placeholder="85"
+                    onValueChange={(v) => handleChange("steep_temperature_c", v)}
+                    defaultFillValue="85"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="steep_time_minutes">Steep Time (min)</Label>
-                  <Input
+                  <DefaultInput
                     id="steep_time_minutes"
                     type="number"
                     value={formData.steep_time_minutes}
                     onChange={(e) => handleChange("steep_time_minutes", e.target.value)}
-                    placeholder="10"
+                    onValueChange={(v) => handleChange("steep_time_minutes", v)}
+                    defaultFillValue="10"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Botanical Infusion</CardTitle>
+              <CardDescription>Optional botanical/herbal infusion added to the brew</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="botanical_name">Ingredient</Label>
+                <Input
+                  id="botanical_name"
+                  value={formData.botanical_name}
+                  onChange={(e) => handleChange("botanical_name", e.target.value)}
+                  placeholder="Camomile, lavender, elderflower..."
+                />
+              </div>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <div className="space-y-2">
+                  <Label htmlFor="botanical_amount_g">Amount (g)</Label>
+                  <DefaultInput
+                    id="botanical_amount_g"
+                    type="number"
+                    step="0.1"
+                    value={formData.botanical_amount_g}
+                    onChange={(e) => handleChange("botanical_amount_g", e.target.value)}
+                    onValueChange={(v) => handleChange("botanical_amount_g", v)}
+                    defaultFillValue="3"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="botanical_water_ml">Water (ml)</Label>
+                  <DefaultInput
+                    id="botanical_water_ml"
+                    type="number"
+                    step="1"
+                    value={formData.botanical_water_ml}
+                    onChange={(e) => handleChange("botanical_water_ml", e.target.value)}
+                    onValueChange={(v) => handleChange("botanical_water_ml", v)}
+                    defaultFillValue="300"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="botanical_temp_c">Temp (°C)</Label>
+                  <DefaultInput
+                    id="botanical_temp_c"
+                    type="number"
+                    step="1"
+                    value={formData.botanical_temp_c}
+                    onChange={(e) => handleChange("botanical_temp_c", e.target.value)}
+                    onValueChange={(v) => handleChange("botanical_temp_c", v)}
+                    defaultFillValue="50"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="botanical_steep_minutes">Steep (min)</Label>
+                  <DefaultInput
+                    id="botanical_steep_minutes"
+                    type="number"
+                    value={formData.botanical_steep_minutes}
+                    onChange={(e) => handleChange("botanical_steep_minutes", e.target.value)}
+                    onValueChange={(v) => handleChange("botanical_steep_minutes", v)}
+                    defaultFillValue="10"
                   />
                 </div>
               </div>
