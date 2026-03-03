@@ -45,6 +45,11 @@ const RecipeForm = () => {
     f2_herb_spice_ideas: "",
     f2_sugar_or_juice_guidelines: "",
     notes: "",
+    botanical_name: "",
+    botanical_amount_g: "",
+    botanical_water_ml: "",
+    botanical_temp_c: "",
+    botanical_steep_minutes: "",
   });
 
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
