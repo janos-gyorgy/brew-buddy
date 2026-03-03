@@ -90,11 +90,7 @@ const RecipeForm = () => {
         f2_herb_spice_ideas: recipe.f2_herb_spice_ideas || "",
         f2_sugar_or_juice_guidelines: recipe.f2_sugar_or_juice_guidelines || "",
         notes: recipe.notes || "",
-        botanical_name: (recipe as any).botanical_name || "",
-        botanical_amount_g: (recipe as any).botanical_amount_g?.toString() || "",
-        botanical_water_ml: (recipe as any).botanical_water_ml?.toString() || "",
-        botanical_temp_c: (recipe as any).botanical_temp_c?.toString() || "",
-        botanical_steep_minutes: (recipe as any).botanical_steep_minutes?.toString() || "",
+        notes: recipe.notes || "",
       });
     }
   }, [recipe]);
