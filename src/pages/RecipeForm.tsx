@@ -422,13 +422,14 @@ const RecipeForm = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="starter_percentage">Starter (%)</Label>
-                <Input
+                <DefaultInput
                   id="starter_percentage"
                   type="number"
                   step="0.1"
                   value={formData.starter_percentage}
                   onChange={(e) => handleChange("starter_percentage", e.target.value)}
-                  placeholder="10"
+                  onValueChange={(v) => handleChange("starter_percentage", v)}
+                  defaultFillValue="10"
                 />
               </div>
               <div className="space-y-2">
