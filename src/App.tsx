@@ -7,6 +7,7 @@ import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import Recipes from "./pages/Recipes";
+import BotanicalInfusions from "./pages/BotanicalInfusions";
 import RecipeForm from "./pages/RecipeForm";
 import RecipeDetail from "./pages/RecipeDetail";
 import Batches from "./pages/Batches";
