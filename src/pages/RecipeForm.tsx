@@ -400,13 +400,14 @@ const RecipeForm = () => {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="sugar_g_per_liter">Sugar (g/L)</Label>
-                  <Input
+                  <DefaultInput
                     id="sugar_g_per_liter"
                     type="number"
                     step="0.1"
                     value={formData.sugar_g_per_liter}
                     onChange={(e) => handleChange("sugar_g_per_liter", e.target.value)}
-                    placeholder="70"
+                    onValueChange={(v) => handleChange("sugar_g_per_liter", v)}
+                    defaultFillValue="70"
                   />
                 </div>
                 <div className="space-y-2">
