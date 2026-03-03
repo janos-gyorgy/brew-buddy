@@ -85,6 +85,48 @@ export type Database = {
           },
         ]
       }
+      botanical_infusions: {
+        Row: {
+          amount_g: number | null
+          created_at: string
+          id: string
+          ingredient: string
+          name: string
+          notes: string | null
+          steep_minutes: number | null
+          temp_c: number | null
+          updated_at: string
+          user_id: string
+          water_ml: number | null
+        }
+        Insert: {
+          amount_g?: number | null
+          created_at?: string
+          id?: string
+          ingredient: string
+          name: string
+          notes?: string | null
+          steep_minutes?: number | null
+          temp_c?: number | null
+          updated_at?: string
+          user_id: string
+          water_ml?: number | null
+        }
+        Update: {
+          amount_g?: number | null
+          created_at?: string
+          id?: string
+          ingredient?: string
+          name?: string
+          notes?: string | null
+          steep_minutes?: number | null
+          temp_c?: number | null
+          updated_at?: string
+          user_id?: string
+          water_ml?: number | null
+        }
+        Relationships: []
+      }
       f2_variant_batches: {
         Row: {
           bottle_count: number
@@ -212,11 +254,6 @@ export type Database = {
       recipes: {
         Row: {
           batch_size_liters: number | null
-          botanical_amount_g: number | null
-          botanical_name: string | null
-          botanical_steep_minutes: number | null
-          botanical_temp_c: number | null
-          botanical_water_ml: number | null
           created_at: string
           description: string | null
           f2_fruit_ideas: string | null
@@ -243,11 +280,6 @@ export type Database = {
         }
         Insert: {
           batch_size_liters?: number | null
-          botanical_amount_g?: number | null
-          botanical_name?: string | null
-          botanical_steep_minutes?: number | null
-          botanical_temp_c?: number | null
-          botanical_water_ml?: number | null
           created_at?: string
           description?: string | null
           f2_fruit_ideas?: string | null
@@ -274,11 +306,6 @@ export type Database = {
         }
         Update: {
           batch_size_liters?: number | null
-          botanical_amount_g?: number | null
-          botanical_name?: string | null
-          botanical_steep_minutes?: number | null
-          botanical_temp_c?: number | null
-          botanical_water_ml?: number | null
           created_at?: string
           description?: string | null
           f2_fruit_ideas?: string | null
