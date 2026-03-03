@@ -63,7 +63,6 @@ const BatchDetail = () => {
     fruits_and_juices: "",
     herbs_and_spices: "",
     other_additives: "",
-    priming_sugar_g_per_bottle: "",
     f2_start_date: format(new Date(), "yyyy-MM-dd"),
     expected_ready_date_f2: "",
   });
