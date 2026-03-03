@@ -45,11 +45,6 @@ const RecipeForm = () => {
     f2_herb_spice_ideas: "",
     f2_sugar_or_juice_guidelines: "",
     notes: "",
-    botanical_name: "",
-    botanical_amount_g: "",
-    botanical_water_ml: "",
-    botanical_temp_c: "",
-    botanical_steep_minutes: "",
   });
 
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
@@ -93,18 +88,13 @@ const RecipeForm = () => {
         f2_herb_spice_ideas: recipe.f2_herb_spice_ideas || "",
         f2_sugar_or_juice_guidelines: recipe.f2_sugar_or_juice_guidelines || "",
         notes: recipe.notes || "",
-        botanical_name: (recipe as any).botanical_name || "",
-        botanical_amount_g: (recipe as any).botanical_amount_g?.toString() || "",
-        botanical_water_ml: (recipe as any).botanical_water_ml?.toString() || "",
-        botanical_temp_c: (recipe as any).botanical_temp_c?.toString() || "",
-        botanical_steep_minutes: (recipe as any).botanical_steep_minutes?.toString() || "",
       });
     }
   }, [recipe]);
 
   const saveMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      const { element, botanical_amount_g, botanical_water_ml, botanical_temp_c, botanical_steep_minutes, ...rest } = data;
+      const { element, ...rest } = data;
       const payload = {
         ...rest,
         batch_size_liters: rest.batch_size_liters ? parseFloat(rest.batch_size_liters) : null,
@@ -115,10 +105,6 @@ const RecipeForm = () => {
         starter_percentage: data.starter_percentage ? parseFloat(data.starter_percentage) : null,
         target_f1_days_min: data.target_f1_days_min ? parseInt(data.target_f1_days_min) : null,
         target_f1_days_max: data.target_f1_days_max ? parseInt(data.target_f1_days_max) : null,
-        botanical_amount_g: botanical_amount_g ? parseFloat(botanical_amount_g) : null,
-        botanical_water_ml: botanical_water_ml ? parseFloat(botanical_water_ml) : null,
-        botanical_temp_c: botanical_temp_c ? parseFloat(botanical_temp_c) : null,
-        botanical_steep_minutes: botanical_steep_minutes ? parseInt(botanical_steep_minutes) : null,
       };
 
       if (isEdit) {
@@ -325,72 +311,7 @@ const RecipeForm = () => {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Botanical Infusion</CardTitle>
-              <CardDescription>Optional botanical/herbal infusion added to the brew</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="botanical_name">Ingredient</Label>
-                <Input
-                  id="botanical_name"
-                  value={formData.botanical_name}
-                  onChange={(e) => handleChange("botanical_name", e.target.value)}
-                  placeholder="Camomile, lavender, elderflower..."
-                />
-              </div>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <div className="space-y-2">
-                  <Label htmlFor="botanical_amount_g">Amount (g)</Label>
-                  <DefaultInput
-                    id="botanical_amount_g"
-                    type="number"
-                    step="0.1"
-                    value={formData.botanical_amount_g}
-                    onChange={(e) => handleChange("botanical_amount_g", e.target.value)}
-                    onValueChange={(v) => handleChange("botanical_amount_g", v)}
-                    defaultFillValue="3"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="botanical_water_ml">Water (ml)</Label>
-                  <DefaultInput
-                    id="botanical_water_ml"
-                    type="number"
-                    step="1"
-                    value={formData.botanical_water_ml}
-                    onChange={(e) => handleChange("botanical_water_ml", e.target.value)}
-                    onValueChange={(v) => handleChange("botanical_water_ml", v)}
-                    defaultFillValue="300"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="botanical_temp_c">Temp (°C)</Label>
-                  <DefaultInput
-                    id="botanical_temp_c"
-                    type="number"
-                    step="1"
-                    value={formData.botanical_temp_c}
-                    onChange={(e) => handleChange("botanical_temp_c", e.target.value)}
-                    onValueChange={(v) => handleChange("botanical_temp_c", v)}
-                    defaultFillValue="50"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="botanical_steep_minutes">Steep (min)</Label>
-                  <DefaultInput
-                    id="botanical_steep_minutes"
-                    type="number"
-                    value={formData.botanical_steep_minutes}
-                    onChange={(e) => handleChange("botanical_steep_minutes", e.target.value)}
-                    onValueChange={(v) => handleChange("botanical_steep_minutes", v)}
-                    defaultFillValue="10"
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+
 
           <Card>
             <CardHeader>

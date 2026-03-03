@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2, BookOpen } from "lucide-react";
+import { Plus, Loader2, BookOpen, Leaf } from "lucide-react";
 import { Link } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Badge } from "@/components/ui/badge";
@@ -39,12 +39,20 @@ const Recipes = () => {
             <h2 className="text-3xl font-bold text-foreground">Recipes</h2>
             <p className="text-muted-foreground">Your kombucha recipe templates</p>
           </div>
-          <Button asChild>
-            <Link to="/recipes/new">
-              <Plus className="h-4 w-4 mr-2" />
-              New Recipe
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" asChild>
+              <Link to="/recipes/botanicals">
+                <Leaf className="h-4 w-4 mr-2" />
+                Botanicals
+              </Link>
+            </Button>
+            <Button asChild>
+              <Link to="/recipes/new">
+                <Plus className="h-4 w-4 mr-2" />
+                New Recipe
+              </Link>
+            </Button>
+          </div>
         </div>
 
         {recipes && recipes.length > 0 ? (
