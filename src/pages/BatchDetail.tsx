@@ -628,16 +628,6 @@ const BatchDetail = () => {
                           required
                         />
                       </div>
-                      <div className="space-y-2">
-                        <Label>Sugar/Bottle (g)</Label>
-                        <Input
-                          type="number"
-                          step="0.1"
-                          value={f2FormData.priming_sugar_g_per_bottle}
-                          onChange={(e) => setF2FormData({ ...f2FormData, priming_sugar_g_per_bottle: e.target.value })}
-                          placeholder="2.0"
-                        />
-                      </div>
                     </div>
                     <div className="space-y-2">
                       <Label>Fruits & Juices</Label>

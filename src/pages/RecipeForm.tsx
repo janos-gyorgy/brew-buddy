@@ -247,13 +247,14 @@ const RecipeForm = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="batch_size_liters">Batch Size (Liters)</Label>
-                  <Input
+                  <DefaultInput
                     id="batch_size_liters"
                     type="number"
                     step="0.1"
                     value={formData.batch_size_liters}
                     onChange={(e) => handleChange("batch_size_liters", e.target.value)}
-                    placeholder="5.0"
+                    onValueChange={(v) => handleChange("batch_size_liters", v)}
+                    defaultFillValue="5.0"
                   />
                 </div>
               </div>
