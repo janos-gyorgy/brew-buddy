@@ -105,6 +105,7 @@ const RecipeForm = () => {
   const saveMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
       const { element, ...rest } = data;
+      const { element, botanical_amount_g, botanical_water_ml, botanical_temp_c, botanical_steep_minutes, ...rest } = data;
       const payload = {
         ...rest,
         batch_size_liters: rest.batch_size_liters ? parseFloat(rest.batch_size_liters) : null,
@@ -115,6 +116,10 @@ const RecipeForm = () => {
         starter_percentage: data.starter_percentage ? parseFloat(data.starter_percentage) : null,
         target_f1_days_min: data.target_f1_days_min ? parseInt(data.target_f1_days_min) : null,
         target_f1_days_max: data.target_f1_days_max ? parseInt(data.target_f1_days_max) : null,
+        botanical_amount_g: botanical_amount_g ? parseFloat(botanical_amount_g) : null,
+        botanical_water_ml: botanical_water_ml ? parseFloat(botanical_water_ml) : null,
+        botanical_temp_c: botanical_temp_c ? parseFloat(botanical_temp_c) : null,
+        botanical_steep_minutes: botanical_steep_minutes ? parseInt(botanical_steep_minutes) : null,
       };
 
       if (isEdit) {
