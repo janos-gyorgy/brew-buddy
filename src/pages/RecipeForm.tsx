@@ -104,7 +104,6 @@ const RecipeForm = () => {
 
   const saveMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      const { element, ...rest } = data;
       const { element, botanical_amount_g, botanical_water_ml, botanical_temp_c, botanical_steep_minutes, ...rest } = data;
       const payload = {
         ...rest,
