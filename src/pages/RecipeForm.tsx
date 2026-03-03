@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import DefaultInput from "@/components/DefaultInput";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -44,6 +45,11 @@ const RecipeForm = () => {
     f2_herb_spice_ideas: "",
     f2_sugar_or_juice_guidelines: "",
     notes: "",
+    botanical_name: "",
+    botanical_amount_g: "",
+    botanical_water_ml: "",
+    botanical_temp_c: "",
+    botanical_steep_minutes: "",
   });
 
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
@@ -87,13 +93,18 @@ const RecipeForm = () => {
         f2_herb_spice_ideas: recipe.f2_herb_spice_ideas || "",
         f2_sugar_or_juice_guidelines: recipe.f2_sugar_or_juice_guidelines || "",
         notes: recipe.notes || "",
+        botanical_name: (recipe as any).botanical_name || "",
+        botanical_amount_g: (recipe as any).botanical_amount_g?.toString() || "",
+        botanical_water_ml: (recipe as any).botanical_water_ml?.toString() || "",
+        botanical_temp_c: (recipe as any).botanical_temp_c?.toString() || "",
+        botanical_steep_minutes: (recipe as any).botanical_steep_minutes?.toString() || "",
       });
     }
   }, [recipe]);
 
   const saveMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      const { element, ...rest } = data;
+      const { element, botanical_amount_g, botanical_water_ml, botanical_temp_c, botanical_steep_minutes, ...rest } = data;
       const payload = {
         ...rest,
         batch_size_liters: rest.batch_size_liters ? parseFloat(rest.batch_size_liters) : null,
@@ -104,6 +115,10 @@ const RecipeForm = () => {
         starter_percentage: data.starter_percentage ? parseFloat(data.starter_percentage) : null,
         target_f1_days_min: data.target_f1_days_min ? parseInt(data.target_f1_days_min) : null,
         target_f1_days_max: data.target_f1_days_max ? parseInt(data.target_f1_days_max) : null,
+        botanical_amount_g: botanical_amount_g ? parseFloat(botanical_amount_g) : null,
+        botanical_water_ml: botanical_water_ml ? parseFloat(botanical_water_ml) : null,
+        botanical_temp_c: botanical_temp_c ? parseFloat(botanical_temp_c) : null,
+        botanical_steep_minutes: botanical_steep_minutes ? parseInt(botanical_steep_minutes) : null,
       };
 
       if (isEdit) {
@@ -231,13 +246,14 @@ const RecipeForm = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="batch_size_liters">Batch Size (Liters)</Label>
-                  <Input
+                  <DefaultInput
                     id="batch_size_liters"
                     type="number"
                     step="0.1"
                     value={formData.batch_size_liters}
                     onChange={(e) => handleChange("batch_size_liters", e.target.value)}
-                    placeholder="5.0"
+                    onValueChange={(v) => handleChange("batch_size_liters", v)}
+                    defaultFillValue="5.0"
                   />
                 </div>
               </div>
@@ -272,34 +288,104 @@ const RecipeForm = () => {
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="space-y-2">
                   <Label htmlFor="tea_amount_g_per_liter">Tea (g/L)</Label>
-                  <Input
+                  <DefaultInput
                     id="tea_amount_g_per_liter"
                     type="number"
                     step="0.1"
                     value={formData.tea_amount_g_per_liter}
                     onChange={(e) => handleChange("tea_amount_g_per_liter", e.target.value)}
-                    placeholder="8.0"
+                    onValueChange={(v) => handleChange("tea_amount_g_per_liter", v)}
+                    defaultFillValue="8.0"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="steep_temperature_c">Steep Temp (°C)</Label>
-                  <Input
+                  <DefaultInput
                     id="steep_temperature_c"
                     type="number"
                     step="0.1"
                     value={formData.steep_temperature_c}
                     onChange={(e) => handleChange("steep_temperature_c", e.target.value)}
-                    placeholder="85"
+                    onValueChange={(v) => handleChange("steep_temperature_c", v)}
+                    defaultFillValue="85"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="steep_time_minutes">Steep Time (min)</Label>
-                  <Input
+                  <DefaultInput
                     id="steep_time_minutes"
                     type="number"
                     value={formData.steep_time_minutes}
                     onChange={(e) => handleChange("steep_time_minutes", e.target.value)}
-                    placeholder="10"
+                    onValueChange={(v) => handleChange("steep_time_minutes", v)}
+                    defaultFillValue="10"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Botanical Infusion</CardTitle>
+              <CardDescription>Optional botanical/herbal infusion added to the brew</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="botanical_name">Ingredient</Label>
+                <Input
+                  id="botanical_name"
+                  value={formData.botanical_name}
+                  onChange={(e) => handleChange("botanical_name", e.target.value)}
+                  placeholder="Camomile, lavender, elderflower..."
+                />
+              </div>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <div className="space-y-2">
+                  <Label htmlFor="botanical_amount_g">Amount (g)</Label>
+                  <DefaultInput
+                    id="botanical_amount_g"
+                    type="number"
+                    step="0.1"
+                    value={formData.botanical_amount_g}
+                    onChange={(e) => handleChange("botanical_amount_g", e.target.value)}
+                    onValueChange={(v) => handleChange("botanical_amount_g", v)}
+                    defaultFillValue="3"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="botanical_water_ml">Water (ml)</Label>
+                  <DefaultInput
+                    id="botanical_water_ml"
+                    type="number"
+                    step="1"
+                    value={formData.botanical_water_ml}
+                    onChange={(e) => handleChange("botanical_water_ml", e.target.value)}
+                    onValueChange={(v) => handleChange("botanical_water_ml", v)}
+                    defaultFillValue="300"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="botanical_temp_c">Temp (°C)</Label>
+                  <DefaultInput
+                    id="botanical_temp_c"
+                    type="number"
+                    step="1"
+                    value={formData.botanical_temp_c}
+                    onChange={(e) => handleChange("botanical_temp_c", e.target.value)}
+                    onValueChange={(v) => handleChange("botanical_temp_c", v)}
+                    defaultFillValue="50"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="botanical_steep_minutes">Steep (min)</Label>
+                  <DefaultInput
+                    id="botanical_steep_minutes"
+                    type="number"
+                    value={formData.botanical_steep_minutes}
+                    onChange={(e) => handleChange("botanical_steep_minutes", e.target.value)}
+                    onValueChange={(v) => handleChange("botanical_steep_minutes", v)}
+                    defaultFillValue="10"
                   />
                 </div>
               </div>
@@ -314,13 +400,14 @@ const RecipeForm = () => {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="sugar_g_per_liter">Sugar (g/L)</Label>
-                  <Input
+                  <DefaultInput
                     id="sugar_g_per_liter"
                     type="number"
                     step="0.1"
                     value={formData.sugar_g_per_liter}
                     onChange={(e) => handleChange("sugar_g_per_liter", e.target.value)}
-                    placeholder="70"
+                    onValueChange={(v) => handleChange("sugar_g_per_liter", v)}
+                    defaultFillValue="70"
                   />
                 </div>
                 <div className="space-y-2">
@@ -335,13 +422,14 @@ const RecipeForm = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="starter_percentage">Starter (%)</Label>
-                <Input
+                <DefaultInput
                   id="starter_percentage"
                   type="number"
                   step="0.1"
                   value={formData.starter_percentage}
                   onChange={(e) => handleChange("starter_percentage", e.target.value)}
-                  placeholder="10"
+                  onValueChange={(v) => handleChange("starter_percentage", v)}
+                  defaultFillValue="10"
                 />
               </div>
               <div className="space-y-2">
