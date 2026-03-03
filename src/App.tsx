@@ -7,6 +7,7 @@ import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import Recipes from "./pages/Recipes";
+import BotanicalInfusions from "./pages/BotanicalInfusions";
 import RecipeForm from "./pages/RecipeForm";
 import RecipeDetail from "./pages/RecipeDetail";
 import Batches from "./pages/Batches";
@@ -31,8 +32,10 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/recipes" element={<ProtectedRoute><Recipes /></ProtectedRoute>} />
+            <Route path="/recipes/botanicals" element={<ProtectedRoute><BotanicalInfusions /></ProtectedRoute>} />
             <Route path="/recipes/new" element={<ProtectedRoute><RecipeForm /></ProtectedRoute>} />
             <Route path="/recipes/:id" element={<ProtectedRoute><RecipeDetail /></ProtectedRoute>} />
+            <Route path="/recipes/:id/edit" element={<ProtectedRoute><RecipeForm /></ProtectedRoute>} />
             <Route path="/recipes/:id/edit" element={<ProtectedRoute><RecipeForm /></ProtectedRoute>} />
             <Route path="/batches" element={<ProtectedRoute><Batches /></ProtectedRoute>} />
             <Route path="/batches/new" element={<ProtectedRoute><BatchForm /></ProtectedRoute>} />
