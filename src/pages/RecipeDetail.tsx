@@ -266,6 +266,40 @@ const RecipeDetail = () => {
           </CardContent>
         </Card>
 
+        {((recipe as any).botanical_name) && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Botanical Infusion</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-4">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Ingredient</p>
+                  <p className="text-foreground">{(recipe as any).botanical_name}</p>
+                </div>
+                {(recipe as any).botanical_amount_g && (
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Amount</p>
+                    <p className="text-foreground">{(recipe as any).botanical_amount_g}g</p>
+                  </div>
+                )}
+                {(recipe as any).botanical_water_ml && (
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Water</p>
+                    <p className="text-foreground">{(recipe as any).botanical_water_ml}ml at {(recipe as any).botanical_temp_c || "?"}°C</p>
+                  </div>
+                )}
+                {(recipe as any).botanical_steep_minutes && (
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Steep Time</p>
+                    <p className="text-foreground">{(recipe as any).botanical_steep_minutes} min</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {(recipe.f2_fruit_ideas || recipe.f2_herb_spice_ideas || recipe.f2_sugar_or_juice_guidelines) && (
           <Card>
             <CardHeader>

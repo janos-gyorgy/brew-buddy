@@ -286,18 +286,6 @@ const F2VariantDetail = () => {
           </CardContent>
         </Card>
 
-        {variant.priming_sugar_g_per_bottle && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Priming Sugar</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{variant.priming_sugar_g_per_bottle}g per bottle</div>
-              <div className="text-sm text-muted-foreground mt-1">
-                Total: {(variant.priming_sugar_g_per_bottle * variant.bottle_count).toFixed(1)}g
-              </div>
-            </CardContent>
-          </Card>
         )}
 
         {(variant.fruits_and_juices || variant.herbs_and_spices || variant.other_additives) && (

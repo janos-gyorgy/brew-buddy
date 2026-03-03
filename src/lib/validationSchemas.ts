@@ -63,7 +63,7 @@ export const f2VariantSchema = z.object({
   fruits_and_juices: z.string().max(500).optional(),
   herbs_and_spices: z.string().max(500).optional(),
   other_additives: z.string().max(500).optional(),
-  priming_sugar_g_per_bottle: z.number().positive('Must be positive').max(1000).optional(),
+  
 });
 
 // Tasting notes validation schema
