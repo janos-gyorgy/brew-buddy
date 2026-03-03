@@ -286,7 +286,7 @@ const F2VariantDetail = () => {
           </CardContent>
         </Card>
 
-        )}
+
 
         {(variant.fruits_and_juices || variant.herbs_and_spices || variant.other_additives) && (
           <Card>
