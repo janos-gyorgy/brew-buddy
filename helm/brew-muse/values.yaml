@@ -1,0 +1,38 @@
+replicaCount: 1
+
+image:
+  repository: brew-muse
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# Environment variables injected at runtime
+env:
+  VITE_SUPABASE_URL: "https://dgqthfzjjzxxfytywkdm.supabase.co"
+  VITE_SUPABASE_PUBLISHABLE_KEY: ""
+  VITE_SUPABASE_PROJECT_ID: "dgqthfzjjzxxfytywkdm"
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations: {}
+  hosts:
+    - host: brew-muse.local
+      paths:
+        - path: /
+          pathType: Prefix
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
