@@ -3,8 +3,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "./hooks/useAuth";
-import { ProtectedRoute } from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import Recipes from "./pages/Recipes";
 import BotanicalInfusions from "./pages/BotanicalInfusions";
@@ -15,7 +13,6 @@ import BatchForm from "./pages/BatchForm";
 import BatchDetail from "./pages/BatchDetail";
 import F2Variants from "./pages/F2Variants";
 import F2VariantDetail from "./pages/F2VariantDetail";
-import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import Statistics from "./pages/Statistics";
 
@@ -23,33 +20,28 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/recipes" element={<ProtectedRoute><Recipes /></ProtectedRoute>} />
-            <Route path="/recipes/botanicals" element={<ProtectedRoute><BotanicalInfusions /></ProtectedRoute>} />
-            <Route path="/recipes/new" element={<ProtectedRoute><RecipeForm /></ProtectedRoute>} />
-            <Route path="/recipes/:id" element={<ProtectedRoute><RecipeDetail /></ProtectedRoute>} />
-            <Route path="/recipes/:id/edit" element={<ProtectedRoute><RecipeForm /></ProtectedRoute>} />
-            <Route path="/recipes/:id/edit" element={<ProtectedRoute><RecipeForm /></ProtectedRoute>} />
-            <Route path="/batches" element={<ProtectedRoute><Batches /></ProtectedRoute>} />
-            <Route path="/batches/new" element={<ProtectedRoute><BatchForm /></ProtectedRoute>} />
-            <Route path="/batches/:id" element={<ProtectedRoute><BatchDetail /></ProtectedRoute>} />
-            <Route path="/batches/:id/edit" element={<ProtectedRoute><BatchForm /></ProtectedRoute>} />
-            <Route path="/f2-variants" element={<ProtectedRoute><F2Variants /></ProtectedRoute>} />
-            <Route path="/f2-variants/:id" element={<ProtectedRoute><F2VariantDetail /></ProtectedRoute>} />
-            <Route path="/statistics" element={<ProtectedRoute><Statistics /></ProtectedRoute>} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/recipes" element={<Recipes />} />
+          <Route path="/recipes/botanicals" element={<BotanicalInfusions />} />
+          <Route path="/recipes/new" element={<RecipeForm />} />
+          <Route path="/recipes/:id" element={<RecipeDetail />} />
+          <Route path="/recipes/:id/edit" element={<RecipeForm />} />
+          <Route path="/batches" element={<Batches />} />
+          <Route path="/batches/new" element={<BatchForm />} />
+          <Route path="/batches/:id" element={<BatchDetail />} />
+          <Route path="/batches/:id/edit" element={<BatchForm />} />
+          <Route path="/f2-variants" element={<F2Variants />} />
+          <Route path="/f2-variants/:id" element={<F2VariantDetail />} />
+          <Route path="/statistics" element={<Statistics />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
+    </TooltipProvider>
   </QueryClientProvider>
 );
 

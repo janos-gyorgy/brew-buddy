@@ -5,6 +5,4 @@ metadata:
   labels:
     {{- include "brew-muse.labels" . | nindent 4 }}
 data:
-  {{- range $key, $value := .Values.env }}
-  {{ $key }}: {{ $value | quote }}
-  {{- end }}
+  API_BACKEND_URL: {{ .Values.env.API_BACKEND_URL | quote }}

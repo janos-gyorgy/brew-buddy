@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { api } from "@/lib/api";
+import type { Recipe, Batch } from "@/lib/types";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,35 +28,16 @@ const RecipeDetail = () => {
 
   const { data: recipe, isLoading } = useQuery({
     queryKey: ["recipe", id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("recipes")
-        .select("*")
-        .eq("id", id)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
-    },
+    queryFn: () => api.get<Recipe>(`/recipes/${id}`),
   });
 
   const { data: batches } = useQuery({
     queryKey: ["recipe-batches", id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("batches")
-        .select("*")
-        .eq("recipe_id", id)
-        .order("start_date", { ascending: false });
-      if (error) throw error;
-      return data;
-    },
+    queryFn: () => api.get<Batch[]>(`/batches?recipe_id=${id}`),
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.from("recipes").delete().eq("id", id);
-      if (error) throw error;
-    },
+    mutationFn: () => api.delete(`/recipes/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["recipes"] });
       toast.success("Recipe deleted");
@@ -152,12 +134,6 @@ const RecipeDetail = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
-              {(recipe as any).element && (
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Element</p>
-                  <p className="text-foreground">{(recipe as any).element}</p>
-                </div>
-              )}
               {recipe.batch_size_liters && (
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Batch Size</p>
@@ -265,8 +241,6 @@ const RecipeDetail = () => {
             </div>
           </CardContent>
         </Card>
-
-
 
         {(recipe.f2_fruit_ideas || recipe.f2_herb_spice_ideas || recipe.f2_sugar_or_juice_guidelines) && (
           <Card>
