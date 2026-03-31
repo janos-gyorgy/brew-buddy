@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { Loader2, ArrowLeft, Edit, Trash2, Plus, FlaskConical } from "lucide-react";
+import { formatStatus } from "@/lib/status";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -312,7 +313,7 @@ const RecipeDetail = () => {
                       <div>
                         <p className="font-medium text-foreground">{batch.batch_code}</p>
                         <p className="text-sm text-muted-foreground">
-                          {batch.total_volume_liters}L • {batch.status.replace(/_/g, " ")}
+                          {batch.total_volume_liters}L • {formatStatus(batch.status)}
                         </p>
                       </div>
                     </div>

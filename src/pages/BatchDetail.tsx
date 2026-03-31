@@ -15,6 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { Loader2, ArrowLeft, Edit, Plus, TestTube, Trash2 } from "lucide-react";
 import { format } from "date-fns";
+import { getBatchStatusColor, formatStatus } from "@/lib/status";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -146,20 +147,6 @@ const BatchDetail = () => {
     onError: (error) => toast.error("Failed to delete batch: " + error.message),
   });
 
-  const getStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
-      planned: "bg-muted text-muted-foreground",
-      fermenting_f1: "bg-info text-info-foreground",
-      ready_for_f2: "bg-warning text-warning-foreground",
-      fermenting_f2: "bg-info text-info-foreground",
-      cold_crash: "bg-accent text-accent-foreground",
-      bottled: "bg-secondary text-secondary-foreground",
-      finished: "bg-success text-success-foreground",
-      failed: "bg-destructive text-destructive-foreground",
-    };
-    return colors[status] || "bg-muted text-muted-foreground";
-  };
-
   if (isLoading) {
     return (
       <Layout>
@@ -229,8 +216,8 @@ const BatchDetail = () => {
           <CardHeader><CardTitle>Status</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-4">
-              <Badge className={getStatusColor(batch.status)} style={{ fontSize: "1rem", padding: "0.5rem 1rem" }}>
-                {batch.status.replace(/_/g, " ")}
+              <Badge className={getBatchStatusColor(batch.status)} style={{ fontSize: "1rem", padding: "0.5rem 1rem" }}>
+                {formatStatus(batch.status)}
               </Badge>
               <Select value={batch.status} onValueChange={(v) => updateStatusMutation.mutate(v as BatchStatus)}>
                 <SelectTrigger className="w-[250px]"><SelectValue /></SelectTrigger>

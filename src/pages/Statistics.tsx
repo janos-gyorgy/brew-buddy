@@ -3,6 +3,7 @@ import { api } from "@/lib/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, BookOpen, FlaskConical, TestTubes, TrendingUp, Award, Calendar } from "lucide-react";
 import Layout from "@/components/Layout";
+import { formatStatus } from "@/lib/status";
 import { Badge } from "@/components/ui/badge";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
@@ -134,7 +135,7 @@ const Statistics = () => {
               {stats?.batchesByStatus &&
                 Object.entries(stats.batchesByStatus).map(([status, count]) => (
                   <Badge key={status} variant="secondary" className="text-sm">
-                    {status.replace(/_/g, " ")}: {count}
+                    {formatStatus(status)}: {count}
                   </Badge>
                 ))}
             </div>

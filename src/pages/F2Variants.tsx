@@ -7,23 +7,13 @@ import { Link } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { getF2StatusColor } from "@/lib/status";
 
 const F2Variants = () => {
   const { data: variants, isLoading } = useQuery({
     queryKey: ["f2-variants"],
     queryFn: () => api.get<F2Variant[]>('/f2-variants'),
   });
-
-  const getStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
-      fermenting: "bg-info text-info-foreground",
-      cold_crash: "bg-accent text-accent-foreground",
-      ready: "bg-success text-success-foreground",
-      consumed: "bg-muted text-muted-foreground",
-      failed: "bg-destructive text-destructive-foreground",
-    };
-    return colors[status] || "bg-muted text-muted-foreground";
-  };
 
   if (isLoading) {
     return (
@@ -60,7 +50,7 @@ const F2Variants = () => {
                     </div>
 
                     <div className="space-y-2 mb-3">
-                      <Badge className={getStatusColor(variant.f2_status)}>{variant.f2_status}</Badge>
+                      <Badge className={getF2StatusColor(variant.f2_status)}>{variant.f2_status}</Badge>
                       <div className="text-sm text-muted-foreground">
                         <p>{variant.bottle_count} × {variant.bottle_size_liters}L bottles</p>
                         <p className="text-xs mt-1">

@@ -8,26 +8,13 @@ import { Link } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { getBatchStatusColor, formatStatus } from "@/lib/status";
 
 const Batches = () => {
   const { data: batches, isLoading } = useQuery({
     queryKey: ["batches"],
     queryFn: () => api.get<Batch[]>('/batches'),
   });
-
-  const getStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
-      planned: "bg-muted text-muted-foreground",
-      fermenting_f1: "bg-info text-info-foreground",
-      ready_for_f2: "bg-warning text-warning-foreground",
-      fermenting_f2: "bg-info text-info-foreground",
-      cold_crash: "bg-accent text-accent-foreground",
-      bottled: "bg-secondary text-secondary-foreground",
-      finished: "bg-success text-success-foreground",
-      failed: "bg-destructive text-destructive-foreground",
-    };
-    return colors[status] || "bg-muted text-muted-foreground";
-  };
 
   if (isLoading) {
     return (
@@ -68,8 +55,8 @@ const Batches = () => {
                           <h3 className="font-semibold text-lg text-foreground">
                             {batch.batch_code}
                           </h3>
-                          <Badge className={getStatusColor(batch.status)}>
-                            {batch.status.replace(/_/g, " ")}
+                          <Badge className={getBatchStatusColor(batch.status)}>
+                            {formatStatus(batch.status)}
                           </Badge>
                         </div>
                         <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
