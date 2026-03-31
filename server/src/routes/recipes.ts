@@ -2,11 +2,9 @@ import { Hono } from 'hono';
 import { desc, eq } from 'drizzle-orm';
 import { db } from '../db.js';
 import { recipes } from '../schema.js';
+import { toNum } from '../utils.js';
 
 const router = new Hono();
-
-const toNum = (v: string | null | undefined) =>
-  v !== null && v !== undefined ? parseFloat(v) : null;
 
 function mapRecipe(r: typeof recipes.$inferSelect) {
   return {

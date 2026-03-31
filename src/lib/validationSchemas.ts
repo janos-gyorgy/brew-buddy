@@ -69,5 +69,5 @@ export const f2VariantSchema = z.object({
 // Tasting notes validation schema
 export const tastingNotesSchema = z.object({
   tasting_notes: z.string().max(2000, 'Tasting notes must be less than 2000 characters').optional(),
-  tasting_rating: z.number().int().min(1, 'Rating must be at least 1').max(5, 'Rating must be at most 5').optional(),
+  tasting_rating: z.number().int().min(1, 'Rating must be at least 1').max(10, 'Rating must be at most 10').optional(),
 });

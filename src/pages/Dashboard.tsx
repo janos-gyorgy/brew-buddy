@@ -7,6 +7,7 @@ import { Loader2, AlertCircle, Droplets, TestTube } from "lucide-react";
 import { Link } from "react-router-dom";
 import { format, isPast, isToday } from "date-fns";
 import Layout from "@/components/Layout";
+import { getBatchStatusColor, getF2StatusColor, formatStatus } from "@/lib/status";
 
 const Dashboard = () => {
   const { data: activeBatches, isLoading: batchesLoading } = useQuery({
@@ -18,18 +19,6 @@ const Dashboard = () => {
     queryKey: ["active-f2-variants"],
     queryFn: () => api.get<F2Variant[]>('/f2-variants/active'),
   });
-
-  const getStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
-      fermenting_f1: "bg-info text-info-foreground",
-      ready_for_f2: "bg-warning text-warning-foreground",
-      fermenting_f2: "bg-info text-info-foreground",
-      fermenting: "bg-info text-info-foreground",
-      cold_crash: "bg-accent text-accent-foreground",
-      ready: "bg-success text-success-foreground",
-    };
-    return colors[status] || "bg-muted text-muted-foreground";
-  };
 
   const isAttentionNeeded = (date: Date | null) => {
     if (!date) return false;
@@ -96,8 +85,8 @@ const Dashboard = () => {
                               </p>
                             )}
                           </div>
-                          <Badge className={getStatusColor(batch.status)}>
-                            {batch.status.replace(/_/g, " ")}
+                          <Badge className={getBatchStatusColor(batch.status)}>
+                            {formatStatus(batch.status)}
                           </Badge>
                         </div>
                       </Link>
@@ -149,8 +138,8 @@ const Dashboard = () => {
                               </p>
                             )}
                           </div>
-                          <Badge className={getStatusColor(variant.f2_status)}>
-                            {variant.f2_status}
+                          <Badge className={getF2StatusColor(variant.f2_status)}>
+                            {formatStatus(variant.f2_status)}
                           </Badge>
                         </div>
                       </Link>
