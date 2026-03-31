@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { api } from "@/lib/api";
+import type { Recipe } from "@/lib/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Loader2, BookOpen, Leaf } from "lucide-react";
@@ -10,15 +11,7 @@ import { Badge } from "@/components/ui/badge";
 const Recipes = () => {
   const { data: recipes, isLoading } = useQuery({
     queryKey: ["recipes"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("recipes")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      return data;
-    },
+    queryFn: () => api.get<Recipe[]>('/recipes'),
   });
 
   if (isLoading) {

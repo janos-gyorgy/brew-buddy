@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
+import { api } from "@/lib/api";
+import type { Recipe, Batch } from "@/lib/types";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +22,6 @@ const BatchForm = () => {
   const recipeId = searchParams.get("recipe");
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { user } = useAuth();
   const isEdit = !!id;
 
   const [formData, setFormData] = useState({
@@ -46,40 +45,18 @@ const BatchForm = () => {
 
   const { data: recipes } = useQuery({
     queryKey: ["recipes"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("recipes").select("*").order("name");
-      if (error) throw error;
-      return data;
-    },
+    queryFn: () => api.get<Recipe[]>('/recipes'),
   });
 
   const { data: selectedRecipe } = useQuery({
     queryKey: ["recipe", formData.recipe_id],
-    queryFn: async () => {
-      if (!formData.recipe_id) return null;
-      const { data, error } = await supabase
-        .from("recipes")
-        .select("*")
-        .eq("id", formData.recipe_id)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
-    },
+    queryFn: () => api.get<Recipe>(`/recipes/${formData.recipe_id}`),
     enabled: !!formData.recipe_id,
   });
 
   const { data: batch, isLoading } = useQuery({
     queryKey: ["batch", id],
-    queryFn: async () => {
-      if (!id) return null;
-      const { data, error } = await supabase
-        .from("batches")
-        .select("*")
-        .eq("id", id)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
-    },
+    queryFn: () => api.get<Batch>(`/batches/${id}`),
     enabled: isEdit,
   });
 
@@ -107,21 +84,16 @@ const BatchForm = () => {
   useEffect(() => {
     if (selectedRecipe && !isEdit) {
       setFormData((prev) => {
-        const updates: any = {};
-        
-        // Update target ready date if recipe has target days
+        const updates: Partial<typeof prev> = {};
         if (selectedRecipe.target_f1_days_max) {
           const startDate = new Date(prev.start_date);
           const targetDate = new Date(startDate);
           targetDate.setDate(targetDate.getDate() + selectedRecipe.target_f1_days_max);
           updates.target_ready_date_f1 = format(targetDate, "yyyy-MM-dd");
         }
-        
-        // Auto-fill volume from recipe if not manually set
         if (selectedRecipe.batch_size_liters && !prev.total_volume_liters) {
           updates.total_volume_liters = selectedRecipe.batch_size_liters.toString();
         }
-        
         return Object.keys(updates).length > 0 ? { ...prev, ...updates } : prev;
       });
     }
@@ -138,7 +110,7 @@ const BatchForm = () => {
       const payload = {
         batch_code: data.batch_code,
         start_date: data.start_date,
-        status: data.status as "planned" | "fermenting_f1" | "ready_for_f2" | "fermenting_f2" | "cold_crash" | "bottled" | "finished" | "failed",
+        status: data.status,
         vessel_type: data.vessel_type || null,
         vessel_location: data.vessel_location || null,
         starter_source: data.starter_source || null,
@@ -151,13 +123,10 @@ const BatchForm = () => {
         ambient_temperature_c: data.ambient_temperature_c ? parseFloat(data.ambient_temperature_c) : null,
         target_ready_date_f1: data.target_ready_date_f1 || null,
       };
-
       if (isEdit) {
-        const { error } = await supabase.from("batches").update(payload).eq("id", id);
-        if (error) throw error;
+        return api.put<Batch>(`/batches/${id}`, payload);
       } else {
-        const { error } = await supabase.from("batches").insert([{ ...payload, user_id: user?.id }]);
-        if (error) throw error;
+        return api.post<Batch>('/batches', payload);
       }
     },
     onSuccess: () => {
@@ -173,10 +142,8 @@ const BatchForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validate form data
     try {
-      const validatedData = batchSchema.parse({
+      batchSchema.parse({
         ...formData,
         total_volume_liters: parseFloat(formData.total_volume_liters),
         initial_ph: formData.initial_ph ? parseFloat(formData.initial_ph) : undefined,
@@ -189,9 +156,7 @@ const BatchForm = () => {
       if (error instanceof z.ZodError) {
         const errors: Record<string, string> = {};
         error.errors.forEach((err) => {
-          if (err.path[0]) {
-            errors[err.path[0].toString()] = err.message;
-          }
+          if (err.path[0]) errors[err.path[0].toString()] = err.message;
         });
         setValidationErrors(errors);
         toast.error('Please fix the validation errors');

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { Database } from "@/integrations/supabase/types";
+import { api } from "@/lib/api";
+import type { F2Variant, F2Status } from "@/lib/types";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,9 +12,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Loader2, ArrowLeft, Edit, Trash2, ExternalLink, MessageSquare } from "lucide-react";
+import { Loader2, ArrowLeft, Trash2, ExternalLink, MessageSquare } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,40 +30,22 @@ import { format } from "date-fns";
 import { tastingNotesSchema } from "@/lib/validationSchemas";
 import { z } from "zod";
 
-type F2Status = Database["public"]["Enums"]["f2_status"];
-
 const F2VariantDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isNotesDialogOpen, setIsNotesDialogOpen] = useState(false);
-  const [notesFormData, setNotesFormData] = useState({
-    tasting_rating: "",
-    tasting_notes: "",
-  });
+  const [notesFormData, setNotesFormData] = useState({ tasting_rating: "", tasting_notes: "" });
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const { data: variant, isLoading } = useQuery({
     queryKey: ["f2-variant", id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("f2_variant_batches")
-        .select("*, batches(batch_code, recipe_id, recipes(name))")
-        .eq("id", id)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
-    },
+    queryFn: () => api.get<F2Variant>(`/f2-variants/${id}`),
   });
 
   const updateStatusMutation = useMutation({
-    mutationFn: async (newStatus: F2Status) => {
-      const { error } = await supabase
-        .from("f2_variant_batches")
-        .update({ f2_status: newStatus })
-        .eq("id", id);
-      if (error) throw error;
-    },
+    mutationFn: (f2_status: F2Status) =>
+      api.patch<F2Variant>(`/f2-variants/${id}/status`, { f2_status }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["f2-variant", id] });
       queryClient.invalidateQueries({ queryKey: ["f2-variants"] });
@@ -72,37 +54,25 @@ const F2VariantDetail = () => {
   });
 
   const updateNotesMutation = useMutation({
-    mutationFn: async (data: { tasting_rating: number | null; tasting_notes: string | null }) => {
-      const { error } = await supabase
-        .from("f2_variant_batches")
-        .update(data)
-        .eq("id", id);
-      if (error) throw error;
-    },
+    mutationFn: (data: { tasting_rating: number | null; tasting_notes: string | null }) =>
+      api.patch<F2Variant>(`/f2-variants/${id}/notes`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["f2-variant", id] });
       queryClient.invalidateQueries({ queryKey: ["f2-variants"] });
       setIsNotesDialogOpen(false);
       toast.success("Tasting notes updated!");
     },
-    onError: (error) => {
-      toast.error("Failed to update: " + error.message);
-    },
+    onError: (error) => toast.error("Failed to update: " + error.message),
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.from("f2_variant_batches").delete().eq("id", id);
-      if (error) throw error;
-    },
+    mutationFn: () => api.delete(`/f2-variants/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["f2-variants"] });
       toast.success("F2 variant deleted");
       navigate("/f2-variants");
     },
-    onError: (error) => {
-      toast.error("Failed to delete: " + error.message);
-    },
+    onError: (error) => toast.error("Failed to delete: " + error.message),
   });
 
   const handleOpenNotesDialog = () => {
@@ -116,9 +86,8 @@ const F2VariantDetail = () => {
   };
 
   const handleSaveNotes = () => {
-    // Validate form data
     try {
-      const validatedData = tastingNotesSchema.parse({
+      tastingNotesSchema.parse({
         tasting_rating: notesFormData.tasting_rating ? parseInt(notesFormData.tasting_rating) : undefined,
         tasting_notes: notesFormData.tasting_notes || undefined,
       });
@@ -131,9 +100,7 @@ const F2VariantDetail = () => {
       if (error instanceof z.ZodError) {
         const errors: Record<string, string> = {};
         error.errors.forEach((err) => {
-          if (err.path[0]) {
-            errors[err.path[0].toString()] = err.message;
-          }
+          if (err.path[0]) errors[err.path[0].toString()] = err.message;
         });
         setValidationErrors(errors);
         toast.error('Please fix the validation errors');
@@ -156,9 +123,7 @@ const F2VariantDetail = () => {
       <Layout>
         <div className="text-center py-12">
           <p className="text-muted-foreground">F2 variant not found</p>
-          <Button className="mt-4" onClick={() => navigate("/f2-variants")}>
-            Back to F2 Variants
-          </Button>
+          <Button className="mt-4" onClick={() => navigate("/f2-variants")}>Back to F2 Variants</Button>
         </div>
       </Layout>
     );
@@ -189,10 +154,7 @@ const F2VariantDetail = () => {
             </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive">
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete
-                </Button>
+                <Button variant="destructive"><Trash2 className="h-4 w-4 mr-2" />Delete</Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
@@ -203,9 +165,7 @@ const F2VariantDetail = () => {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => deleteMutation.mutate()}>
-                    Delete
-                  </AlertDialogAction>
+                  <AlertDialogAction onClick={() => deleteMutation.mutate()}>Delete</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -213,9 +173,7 @@ const F2VariantDetail = () => {
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Batch Information</CardTitle>
-          </CardHeader>
+          <CardHeader><CardTitle>Batch Information</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               <div>
@@ -229,9 +187,7 @@ const F2VariantDetail = () => {
               </div>
               <div>
                 <div className="text-sm text-muted-foreground">Recipe</div>
-                <div className="font-medium">
-                  {variant.batches?.recipes?.name || "No recipe"}
-                </div>
+                <div className="font-medium">{variant.batches?.recipes?.name || "No recipe"}</div>
               </div>
             </div>
             <div className="grid gap-4 md:grid-cols-3">
@@ -250,9 +206,7 @@ const F2VariantDetail = () => {
               <div>
                 <div className="text-sm text-muted-foreground">Status</div>
                 <Select value={variant.f2_status} onValueChange={(v) => updateStatusMutation.mutate(v as F2Status)}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
+                  <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="fermenting">Fermenting</SelectItem>
                     <SelectItem value="cold_crash">Cold Crash</SelectItem>
@@ -267,9 +221,7 @@ const F2VariantDetail = () => {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Volume & Bottles</CardTitle>
-          </CardHeader>
+          <CardHeader><CardTitle>Volume & Bottles</CardTitle></CardHeader>
           <CardContent className="grid gap-4 md:grid-cols-3">
             <div>
               <div className="text-sm text-muted-foreground">Total Volume</div>
@@ -281,18 +233,14 @@ const F2VariantDetail = () => {
             </div>
             <div>
               <div className="text-sm text-muted-foreground">Bottle Size</div>
-              <div className="text-2xl font-bold">{parseFloat(variant.bottle_size_liters.toString())}L</div>
+              <div className="text-2xl font-bold">{variant.bottle_size_liters}L</div>
             </div>
           </CardContent>
         </Card>
 
-
-
         {(variant.fruits_and_juices || variant.herbs_and_spices || variant.other_additives) && (
           <Card>
-            <CardHeader>
-              <CardTitle>Ingredients</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle>Ingredients</CardTitle></CardHeader>
             <CardContent className="space-y-3">
               {variant.fruits_and_juices && (
                 <div>
@@ -318,9 +266,7 @@ const F2VariantDetail = () => {
 
         {(variant.tasting_rating || variant.tasting_notes) && (
           <Card>
-            <CardHeader>
-              <CardTitle>Tasting Notes</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle>Tasting Notes</CardTitle></CardHeader>
             <CardContent className="space-y-3">
               {variant.tasting_rating && (
                 <div>
@@ -343,9 +289,7 @@ const F2VariantDetail = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Tasting Notes</DialogTitle>
-            <DialogDescription>
-              Add your tasting notes and rating for this F2 variant
-            </DialogDescription>
+            <DialogDescription>Add your tasting notes and rating for this F2 variant</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
@@ -371,9 +315,7 @@ const F2VariantDetail = () => {
               />
             </div>
             <div className="flex gap-2 justify-end">
-              <Button variant="outline" onClick={() => setIsNotesDialogOpen(false)}>
-                Cancel
-              </Button>
+              <Button variant="outline" onClick={() => setIsNotesDialogOpen(false)}>Cancel</Button>
               <Button onClick={handleSaveNotes} disabled={updateNotesMutation.isPending}>
                 {updateNotesMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 Save Notes

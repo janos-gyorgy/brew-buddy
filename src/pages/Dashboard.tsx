@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { api } from "@/lib/api";
+import type { Batch, F2Variant } from "@/lib/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, AlertCircle, Droplets, TestTube } from "lucide-react";
@@ -10,30 +11,12 @@ import Layout from "@/components/Layout";
 const Dashboard = () => {
   const { data: activeBatches, isLoading: batchesLoading } = useQuery({
     queryKey: ["active-batches"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("batches")
-        .select("*, recipes(name)")
-        .in("status", ["fermenting_f1", "ready_for_f2", "fermenting_f2"])
-        .order("start_date", { ascending: false });
-
-      if (error) throw error;
-      return data;
-    },
+    queryFn: () => api.get<Batch[]>('/batches/active'),
   });
 
   const { data: activeF2Variants, isLoading: f2Loading } = useQuery({
     queryKey: ["active-f2-variants"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("f2_variant_batches")
-        .select("*, batches(batch_code)")
-        .in("f2_status", ["fermenting", "cold_crash"])
-        .order("f2_start_date", { ascending: false });
-
-      if (error) throw error;
-      return data;
-    },
+    queryFn: () => api.get<F2Variant[]>('/f2-variants/active'),
   });
 
   const getStatusColor = (status: string) => {

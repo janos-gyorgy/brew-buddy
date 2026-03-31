@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
-import type { Database } from "@/integrations/supabase/types";
+import { api } from "@/lib/api";
+import type { Batch, FermentationLog, F2Variant, FermentationPhase, BatchStatus } from "@/lib/types";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,7 +40,6 @@ const BatchDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { user } = useAuth();
   const [logDialogOpen, setLogDialogOpen] = useState(false);
   const [f2DialogOpen, setF2DialogOpen] = useState(false);
 
@@ -69,152 +67,83 @@ const BatchDetail = () => {
 
   const { data: batch, isLoading } = useQuery({
     queryKey: ["batch", id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("batches")
-        .select("*, recipes(name)")
-        .eq("id", id)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
-    },
+    queryFn: () => api.get<Batch>(`/batches/${id}`),
   });
 
   const { data: logs } = useQuery({
     queryKey: ["fermentation-logs", id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("fermentation_log_entries")
-        .select("*")
-        .eq("batch_id", id)
-        .order("timestamp", { ascending: false });
-      if (error) throw error;
-      return data;
-    },
+    queryFn: () => api.get<FermentationLog[]>(`/batches/${id}/logs`),
   });
 
   const { data: f2Variants } = useQuery({
     queryKey: ["batch-f2-variants", id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("f2_variant_batches")
-        .select("*")
-        .eq("parent_batch_id", id)
-        .order("f2_start_date", { ascending: false });
-      if (error) throw error;
-      return data;
-    },
+    queryFn: () => api.get<F2Variant[]>(`/f2-variants/by-batch/${id}`),
   });
 
   const addLogMutation = useMutation({
-    mutationFn: async (data: typeof logFormData) => {
-      const { error } = await supabase.from("fermentation_log_entries").insert([
-        {
-          batch_id: id,
-          user_id: user?.id,
-          phase: data.phase as "f1" | "f2" | "cold_crash" | "storage",
-          ph: data.ph ? parseFloat(data.ph) : null,
-          brix: data.brix ? parseFloat(data.brix) : null,
-          temperature_c: data.temperature_c ? parseFloat(data.temperature_c) : null,
-          taste_notes: data.taste_notes || null,
-          actions: data.actions || null,
-          smell_color_notes: data.smell_color_notes || null,
-          issues_or_flags: data.issues_or_flags || null,
-        },
-      ]);
-      if (error) throw error;
-    },
+    mutationFn: (data: typeof logFormData) =>
+      api.post<FermentationLog>(`/batches/${id}/logs`, {
+        phase: data.phase as FermentationPhase,
+        ph: data.ph ? parseFloat(data.ph) : null,
+        brix: data.brix ? parseFloat(data.brix) : null,
+        temperature_c: data.temperature_c ? parseFloat(data.temperature_c) : null,
+        taste_notes: data.taste_notes || null,
+        actions: data.actions || null,
+        smell_color_notes: data.smell_color_notes || null,
+        issues_or_flags: data.issues_or_flags || null,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["fermentation-logs", id] });
       toast.success("Log entry added!");
       setLogDialogOpen(false);
-      setLogFormData({
-        phase: "f1",
-        ph: "",
-        brix: "",
-        temperature_c: "",
-        taste_notes: "",
-        actions: "",
-        smell_color_notes: "",
-        issues_or_flags: "",
-      });
+      setLogFormData({ phase: "f1", ph: "", brix: "", temperature_c: "", taste_notes: "", actions: "", smell_color_notes: "", issues_or_flags: "" });
     },
-    onError: (error) => {
-      toast.error("Failed to add log: " + error.message);
-    },
+    onError: (error) => toast.error("Failed to add log: " + error.message),
   });
 
   const createF2Mutation = useMutation({
-    mutationFn: async (data: typeof f2FormData) => {
-      const { error } = await supabase.from("f2_variant_batches").insert([
-        {
-          parent_batch_id: id,
-          user_id: user?.id,
-          name: data.name,
-          bottle_count: parseInt(data.bottle_count),
-          bottle_size_liters: parseFloat(data.bottle_size_liters),
-          fruits_and_juices: data.fruits_and_juices || null,
-          herbs_and_spices: data.herbs_and_spices || null,
-          other_additives: data.other_additives || null,
-          f2_start_date: data.f2_start_date,
-          expected_ready_date_f2: data.expected_ready_date_f2 || null,
-        },
-      ]);
-      if (error) throw error;
-    },
+    mutationFn: (data: typeof f2FormData) =>
+      api.post<F2Variant>('/f2-variants', {
+        parent_batch_id: id,
+        name: data.name,
+        bottle_count: parseInt(data.bottle_count),
+        bottle_size_liters: parseFloat(data.bottle_size_liters),
+        fruits_and_juices: data.fruits_and_juices || null,
+        herbs_and_spices: data.herbs_and_spices || null,
+        other_additives: data.other_additives || null,
+        f2_start_date: data.f2_start_date,
+        expected_ready_date_f2: data.expected_ready_date_f2 || null,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["batch-f2-variants", id] });
       queryClient.invalidateQueries({ queryKey: ["active-f2-variants"] });
       toast.success("F2 variant created!");
       setF2DialogOpen(false);
-      setF2FormData({
-        name: "",
-        bottle_count: "",
-        bottle_size_liters: "0.5",
-        fruits_and_juices: "",
-        herbs_and_spices: "",
-        other_additives: "",
-        f2_start_date: format(new Date(), "yyyy-MM-dd"),
-        expected_ready_date_f2: "",
-      });
+      setF2FormData({ name: "", bottle_count: "", bottle_size_liters: "0.5", fruits_and_juices: "", herbs_and_spices: "", other_additives: "", f2_start_date: format(new Date(), "yyyy-MM-dd"), expected_ready_date_f2: "" });
     },
-    onError: (error) => {
-      toast.error("Failed to create F2 variant: " + error.message);
-    },
+    onError: (error) => toast.error("Failed to create F2 variant: " + error.message),
   });
 
   const updateStatusMutation = useMutation({
-    mutationFn: async (newStatus: Database["public"]["Enums"]["batch_status"]) => {
-      const { error } = await supabase
-        .from("batches")
-        .update({ status: newStatus })
-        .eq("id", id);
-      if (error) throw error;
-    },
+    mutationFn: (newStatus: BatchStatus) =>
+      api.patch<Batch>(`/batches/${id}/status`, { status: newStatus }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["batch", id] });
       queryClient.invalidateQueries({ queryKey: ["batches"] });
       queryClient.invalidateQueries({ queryKey: ["active-batches"] });
       toast.success("Status updated!");
     },
-    onError: (error) => {
-      toast.error("Failed to update status: " + error.message);
-    },
+    onError: (error) => toast.error("Failed to update status: " + error.message),
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.from("batches").delete().eq("id", id);
-      if (error) throw error;
-    },
+    mutationFn: () => api.delete(`/batches/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["batches"] });
       toast.success("Batch deleted");
       navigate("/batches");
     },
-    onError: (error) => {
-      toast.error("Failed to delete batch: " + error.message);
-    },
+    onError: (error) => toast.error("Failed to delete batch: " + error.message),
   });
 
   const getStatusColor = (status: string) => {
@@ -246,9 +175,7 @@ const BatchDetail = () => {
       <Layout>
         <div className="text-center py-12">
           <p className="text-muted-foreground">Batch not found</p>
-          <Button className="mt-4" onClick={() => navigate("/batches")}>
-            Back to Batches
-          </Button>
+          <Button className="mt-4" onClick={() => navigate("/batches")}>Back to Batches</Button>
         </div>
       </Layout>
     );
@@ -291,9 +218,7 @@ const BatchDetail = () => {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => deleteMutation.mutate()}>
-                    Delete
-                  </AlertDialogAction>
+                  <AlertDialogAction onClick={() => deleteMutation.mutate()}>Delete</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -301,21 +226,14 @@ const BatchDetail = () => {
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Status</CardTitle>
-          </CardHeader>
+          <CardHeader><CardTitle>Status</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-4">
               <Badge className={getStatusColor(batch.status)} style={{ fontSize: "1rem", padding: "0.5rem 1rem" }}>
                 {batch.status.replace(/_/g, " ")}
               </Badge>
-              <Select
-                value={batch.status}
-                onValueChange={(value) => updateStatusMutation.mutate(value as Database["public"]["Enums"]["batch_status"])}
-              >
-                <SelectTrigger className="w-[250px]">
-                  <SelectValue />
-                </SelectTrigger>
+              <Select value={batch.status} onValueChange={(v) => updateStatusMutation.mutate(v as BatchStatus)}>
+                <SelectTrigger className="w-[250px]"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="planned">Planned</SelectItem>
                   <SelectItem value="fermenting_f1">Fermenting F1</SelectItem>
@@ -332,9 +250,7 @@ const BatchDetail = () => {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Batch Information</CardTitle>
-          </CardHeader>
+          <CardHeader><CardTitle>Batch Information</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             <div className="grid gap-4 md:grid-cols-2">
               <div>
@@ -410,10 +326,7 @@ const BatchDetail = () => {
               </div>
               <Dialog open={logDialogOpen} onOpenChange={setLogDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Entry
-                  </Button>
+                  <Button><Plus className="h-4 w-4 mr-2" />Add Entry</Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl">
                   <DialogHeader>
@@ -424,13 +337,8 @@ const BatchDetail = () => {
                     <div className="grid gap-4 md:grid-cols-2">
                       <div className="space-y-2">
                         <Label>Phase</Label>
-                        <Select
-                          value={logFormData.phase}
-                          onValueChange={(v) => setLogFormData({ ...logFormData, phase: v })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
+                        <Select value={logFormData.phase} onValueChange={(v) => setLogFormData({ ...logFormData, phase: v })}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="f1">F1</SelectItem>
                             <SelectItem value="f2">F2</SelectItem>
@@ -443,83 +351,37 @@ const BatchDetail = () => {
                     <div className="grid gap-4 md:grid-cols-3">
                       <div className="space-y-2">
                         <Label>pH</Label>
-                        <Input
-                          type="number"
-                          step="0.1"
-                          value={logFormData.ph}
-                          onChange={(e) => setLogFormData({ ...logFormData, ph: e.target.value })}
-                          placeholder="3.5"
-                        />
+                        <Input type="number" step="0.1" value={logFormData.ph} onChange={(e) => setLogFormData({ ...logFormData, ph: e.target.value })} placeholder="3.5" />
                       </div>
                       <div className="space-y-2">
                         <Label>Brix</Label>
-                        <Input
-                          type="number"
-                          step="0.1"
-                          value={logFormData.brix}
-                          onChange={(e) => setLogFormData({ ...logFormData, brix: e.target.value })}
-                          placeholder="6.0"
-                        />
+                        <Input type="number" step="0.1" value={logFormData.brix} onChange={(e) => setLogFormData({ ...logFormData, brix: e.target.value })} placeholder="6.0" />
                       </div>
                       <div className="space-y-2">
                         <Label>Temp (°C)</Label>
-                        <Input
-                          type="number"
-                          step="0.1"
-                          value={logFormData.temperature_c}
-                          onChange={(e) => setLogFormData({ ...logFormData, temperature_c: e.target.value })}
-                          placeholder="22"
-                        />
+                        <Input type="number" step="0.1" value={logFormData.temperature_c} onChange={(e) => setLogFormData({ ...logFormData, temperature_c: e.target.value })} placeholder="22" />
                       </div>
                     </div>
                     <div className="space-y-2">
                       <Label>Taste Notes</Label>
-                      <Textarea
-                        value={logFormData.taste_notes}
-                        onChange={(e) => setLogFormData({ ...logFormData, taste_notes: e.target.value })}
-                        placeholder="Sweet, tangy, balanced..."
-                        rows={2}
-                      />
+                      <Textarea value={logFormData.taste_notes} onChange={(e) => setLogFormData({ ...logFormData, taste_notes: e.target.value })} placeholder="Sweet, tangy, balanced..." rows={2} />
                     </div>
                     <div className="space-y-2">
                       <Label>Actions Taken</Label>
-                      <Textarea
-                        value={logFormData.actions}
-                        onChange={(e) => setLogFormData({ ...logFormData, actions: e.target.value })}
-                        placeholder="Stirred, vented, adjusted temperature..."
-                        rows={2}
-                      />
+                      <Textarea value={logFormData.actions} onChange={(e) => setLogFormData({ ...logFormData, actions: e.target.value })} placeholder="Stirred, vented, adjusted temperature..." rows={2} />
                     </div>
                     <div className="space-y-2">
                       <Label>Smell & Color</Label>
-                      <Textarea
-                        value={logFormData.smell_color_notes}
-                        onChange={(e) => setLogFormData({ ...logFormData, smell_color_notes: e.target.value })}
-                        placeholder="Fruity aroma, dark amber color..."
-                        rows={2}
-                      />
+                      <Textarea value={logFormData.smell_color_notes} onChange={(e) => setLogFormData({ ...logFormData, smell_color_notes: e.target.value })} placeholder="Fruity aroma, dark amber color..." rows={2} />
                     </div>
                     <div className="space-y-2">
                       <Label>Issues or Flags</Label>
-                      <Textarea
-                        value={logFormData.issues_or_flags}
-                        onChange={(e) => setLogFormData({ ...logFormData, issues_or_flags: e.target.value })}
-                        placeholder="Any concerns or observations..."
-                        rows={2}
-                      />
+                      <Textarea value={logFormData.issues_or_flags} onChange={(e) => setLogFormData({ ...logFormData, issues_or_flags: e.target.value })} placeholder="Any concerns or observations..." rows={2} />
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button
-                      type="button"
-                      onClick={() => addLogMutation.mutate(logFormData)}
-                      disabled={addLogMutation.isPending}
-                    >
-                      {addLogMutation.isPending ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      ) : (
-                        <Plus className="h-4 w-4 mr-2" />
-                      )}
+                    <Button type="button" onClick={() => addLogMutation.mutate(logFormData)} disabled={addLogMutation.isPending}>
+                      {addLogMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Plus className="h-4 w-4 mr-2" />}
                       Add Entry
                     </Button>
                   </DialogFooter>
@@ -537,9 +399,7 @@ const BatchDetail = () => {
                         <p className="font-medium text-foreground">
                           {format(new Date(log.timestamp), "MMM d, yyyy 'at' h:mm a")}
                         </p>
-                        <Badge variant="secondary" className="mt-1">
-                          {log.phase.toUpperCase()}
-                        </Badge>
+                        <Badge variant="secondary" className="mt-1">{log.phase.toUpperCase()}</Badge>
                       </div>
                       <div className="flex gap-4 text-sm">
                         {log.ph && <span className="text-muted-foreground">pH: {log.ph}</span>}
@@ -547,33 +407,15 @@ const BatchDetail = () => {
                         {log.temperature_c && <span className="text-muted-foreground">Temp: {log.temperature_c}°C</span>}
                       </div>
                     </div>
-                    {log.taste_notes && (
-                      <p className="text-sm text-foreground mb-1">
-                        <strong>Taste:</strong> {log.taste_notes}
-                      </p>
-                    )}
-                    {log.actions && (
-                      <p className="text-sm text-foreground mb-1">
-                        <strong>Actions:</strong> {log.actions}
-                      </p>
-                    )}
-                    {log.smell_color_notes && (
-                      <p className="text-sm text-foreground mb-1">
-                        <strong>Smell & Color:</strong> {log.smell_color_notes}
-                      </p>
-                    )}
-                    {log.issues_or_flags && (
-                      <p className="text-sm text-destructive">
-                        <strong>Issues:</strong> {log.issues_or_flags}
-                      </p>
-                    )}
+                    {log.taste_notes && <p className="text-sm text-foreground mb-1"><strong>Taste:</strong> {log.taste_notes}</p>}
+                    {log.actions && <p className="text-sm text-foreground mb-1"><strong>Actions:</strong> {log.actions}</p>}
+                    {log.smell_color_notes && <p className="text-sm text-foreground mb-1"><strong>Smell & Color:</strong> {log.smell_color_notes}</p>}
+                    {log.issues_or_flags && <p className="text-sm text-destructive"><strong>Issues:</strong> {log.issues_or_flags}</p>}
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-center text-muted-foreground py-8">
-                No log entries yet. Add your first measurement!
-              </p>
+              <p className="text-center text-muted-foreground py-8">No log entries yet. Add your first measurement!</p>
             )}
           </CardContent>
         </Card>
@@ -587,10 +429,7 @@ const BatchDetail = () => {
               </div>
               <Dialog open={f2DialogOpen} onOpenChange={setF2DialogOpen}>
                 <DialogTrigger asChild>
-                  <Button>
-                    <TestTube className="h-4 w-4 mr-2" />
-                    Create F2 Variant
-                  </Button>
+                  <Button><TestTube className="h-4 w-4 mr-2" />Create F2 Variant</Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl">
                   <DialogHeader>
@@ -600,93 +439,44 @@ const BatchDetail = () => {
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <Label>Variant Name *</Label>
-                      <Input
-                        value={f2FormData.name}
-                        onChange={(e) => setF2FormData({ ...f2FormData, name: e.target.value })}
-                        placeholder="Raspberry Ginger"
-                        required
-                      />
+                      <Input value={f2FormData.name} onChange={(e) => setF2FormData({ ...f2FormData, name: e.target.value })} placeholder="Raspberry Ginger" required />
                     </div>
                     <div className="grid gap-4 md:grid-cols-3">
                       <div className="space-y-2">
                         <Label>Bottle Count *</Label>
-                        <Input
-                          type="number"
-                          value={f2FormData.bottle_count}
-                          onChange={(e) => setF2FormData({ ...f2FormData, bottle_count: e.target.value })}
-                          placeholder="12"
-                          required
-                        />
+                        <Input type="number" value={f2FormData.bottle_count} onChange={(e) => setF2FormData({ ...f2FormData, bottle_count: e.target.value })} placeholder="12" required />
                       </div>
                       <div className="space-y-2">
                         <Label>Bottle Size (L) *</Label>
-                        <Input
-                          type="number"
-                          step="0.1"
-                          value={f2FormData.bottle_size_liters}
-                          onChange={(e) => setF2FormData({ ...f2FormData, bottle_size_liters: e.target.value })}
-                          required
-                        />
+                        <Input type="number" step="0.1" value={f2FormData.bottle_size_liters} onChange={(e) => setF2FormData({ ...f2FormData, bottle_size_liters: e.target.value })} required />
                       </div>
                     </div>
                     <div className="space-y-2">
                       <Label>Fruits & Juices</Label>
-                      <Textarea
-                        value={f2FormData.fruits_and_juices}
-                        onChange={(e) => setF2FormData({ ...f2FormData, fruits_and_juices: e.target.value })}
-                        placeholder="Fresh raspberry, blueberry..."
-                        rows={2}
-                      />
+                      <Textarea value={f2FormData.fruits_and_juices} onChange={(e) => setF2FormData({ ...f2FormData, fruits_and_juices: e.target.value })} placeholder="Fresh raspberry, blueberry..." rows={2} />
                     </div>
                     <div className="space-y-2">
                       <Label>Herbs & Spices</Label>
-                      <Textarea
-                        value={f2FormData.herbs_and_spices}
-                        onChange={(e) => setF2FormData({ ...f2FormData, herbs_and_spices: e.target.value })}
-                        placeholder="Fresh ginger, mint..."
-                        rows={2}
-                      />
+                      <Textarea value={f2FormData.herbs_and_spices} onChange={(e) => setF2FormData({ ...f2FormData, herbs_and_spices: e.target.value })} placeholder="Fresh ginger, mint..." rows={2} />
                     </div>
                     <div className="space-y-2">
                       <Label>Other Additives</Label>
-                      <Textarea
-                        value={f2FormData.other_additives}
-                        onChange={(e) => setF2FormData({ ...f2FormData, other_additives: e.target.value })}
-                        placeholder="Spirulina, turmeric..."
-                        rows={2}
-                      />
+                      <Textarea value={f2FormData.other_additives} onChange={(e) => setF2FormData({ ...f2FormData, other_additives: e.target.value })} placeholder="Spirulina, turmeric..." rows={2} />
                     </div>
                     <div className="grid gap-4 md:grid-cols-2">
                       <div className="space-y-2">
                         <Label>F2 Start Date *</Label>
-                        <Input
-                          type="date"
-                          value={f2FormData.f2_start_date}
-                          onChange={(e) => setF2FormData({ ...f2FormData, f2_start_date: e.target.value })}
-                          required
-                        />
+                        <Input type="date" value={f2FormData.f2_start_date} onChange={(e) => setF2FormData({ ...f2FormData, f2_start_date: e.target.value })} required />
                       </div>
                       <div className="space-y-2">
                         <Label>Expected Ready Date</Label>
-                        <Input
-                          type="date"
-                          value={f2FormData.expected_ready_date_f2}
-                          onChange={(e) => setF2FormData({ ...f2FormData, expected_ready_date_f2: e.target.value })}
-                        />
+                        <Input type="date" value={f2FormData.expected_ready_date_f2} onChange={(e) => setF2FormData({ ...f2FormData, expected_ready_date_f2: e.target.value })} />
                       </div>
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button
-                      type="button"
-                      onClick={() => createF2Mutation.mutate(f2FormData)}
-                      disabled={createF2Mutation.isPending || !f2FormData.name || !f2FormData.bottle_count}
-                    >
-                      {createF2Mutation.isPending ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      ) : (
-                        <TestTube className="h-4 w-4 mr-2" />
-                      )}
+                    <Button type="button" onClick={() => createF2Mutation.mutate(f2FormData)} disabled={createF2Mutation.isPending || !f2FormData.name || !f2FormData.bottle_count}>
+                      {createF2Mutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <TestTube className="h-4 w-4 mr-2" />}
                       Create Variant
                     </Button>
                   </DialogFooter>
@@ -698,24 +488,16 @@ const BatchDetail = () => {
             {f2Variants && f2Variants.length > 0 ? (
               <div className="space-y-2">
                 {f2Variants.map((variant) => (
-                  <Link
-                    key={variant.id}
-                    to={`/f2-variants/${variant.id}`}
-                    className="flex items-center justify-between p-3 rounded-lg border border-border hover:border-secondary transition-colors"
-                  >
+                  <Link key={variant.id} to={`/f2-variants/${variant.id}`} className="flex items-center justify-between p-3 rounded-lg border border-border hover:border-secondary transition-colors">
                     <div>
                       <p className="font-medium text-foreground">{variant.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {variant.bottle_count} × {variant.bottle_size_liters}L • {variant.f2_status}
-                      </p>
+                      <p className="text-sm text-muted-foreground">{variant.bottle_count} × {variant.bottle_size_liters}L • {variant.f2_status}</p>
                     </div>
                   </Link>
                 ))}
               </div>
             ) : (
-              <p className="text-center text-muted-foreground py-8">
-                No F2 variants yet. Create your first flavor variant!
-              </p>
+              <p className="text-center text-muted-foreground py-8">No F2 variants yet. Create your first flavor variant!</p>
             )}
           </CardContent>
         </Card>

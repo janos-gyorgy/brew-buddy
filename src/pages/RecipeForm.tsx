@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
+import { api } from "@/lib/api";
+import type { Recipe } from "@/lib/types";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +20,6 @@ const RecipeForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { user } = useAuth();
   const isEdit = !!id;
 
   const [formData, setFormData] = useState({
@@ -51,16 +50,7 @@ const RecipeForm = () => {
 
   const { data: recipe, isLoading } = useQuery({
     queryKey: ["recipe", id],
-    queryFn: async () => {
-      if (!id) return null;
-      const { data, error } = await supabase
-        .from("recipes")
-        .select("*")
-        .eq("id", id)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
-    },
+    queryFn: () => api.get<Recipe>(`/recipes/${id}`),
     enabled: isEdit,
   });
 
@@ -106,13 +96,10 @@ const RecipeForm = () => {
         target_f1_days_min: data.target_f1_days_min ? parseInt(data.target_f1_days_min) : null,
         target_f1_days_max: data.target_f1_days_max ? parseInt(data.target_f1_days_max) : null,
       };
-
       if (isEdit) {
-        const { error } = await supabase.from("recipes").update(payload).eq("id", id);
-        if (error) throw error;
+        return api.put<Recipe>(`/recipes/${id}`, payload);
       } else {
-        const { error } = await supabase.from("recipes").insert([{ ...payload, user_id: user?.id }]);
-        if (error) throw error;
+        return api.post<Recipe>('/recipes', payload);
       }
     },
     onSuccess: () => {
@@ -127,10 +114,8 @@ const RecipeForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validate form data
     try {
-      const validatedData = recipeSchema.parse({
+      recipeSchema.parse({
         ...formData,
         batch_size_liters: formData.batch_size_liters ? parseFloat(formData.batch_size_liters) : undefined,
         tea_amount_g_per_liter: formData.tea_amount_g_per_liter ? parseFloat(formData.tea_amount_g_per_liter) : undefined,
@@ -147,9 +132,7 @@ const RecipeForm = () => {
       if (error instanceof z.ZodError) {
         const errors: Record<string, string> = {};
         error.errors.forEach((err) => {
-          if (err.path[0]) {
-            errors[err.path[0].toString()] = err.message;
-          }
+          if (err.path[0]) errors[err.path[0].toString()] = err.message;
         });
         setValidationErrors(errors);
         toast.error('Please fix the validation errors');
@@ -310,8 +293,6 @@ const RecipeForm = () => {
               </div>
             </CardContent>
           </Card>
-
-
 
           <Card>
             <CardHeader>

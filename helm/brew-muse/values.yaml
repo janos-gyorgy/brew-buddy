@@ -5,11 +5,34 @@ image:
   tag: latest
   pullPolicy: IfNotPresent
 
-# Environment variables injected at runtime
+api:
+  image:
+    repository: brew-muse-api
+    tag: latest
+    pullPolicy: IfNotPresent
+  env:
+    DATABASE_URL: "postgresql://brewbuddy:changeme@brew-muse-postgres:5432/brewbuddy"
+    PORT: "3000"
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 128Mi
+
+# Environment variables for the nginx frontend container
 env:
-  VITE_SUPABASE_URL: "https://dgqthfzjjzxxfytywkdm.supabase.co"
-  VITE_SUPABASE_PUBLISHABLE_KEY: ""
-  VITE_SUPABASE_PROJECT_ID: "dgqthfzjjzxxfytywkdm"
+  API_BACKEND_URL: "http://brew-muse-api:3000"
+
+postgres:
+  enabled: true
+  image: postgres:16-alpine
+  database: brewbuddy
+  username: brewbuddy
+  # Set this via --set postgres.password=... or a Secret
+  password: changeme
+  storage: 5Gi
 
 service:
   type: ClusterIP

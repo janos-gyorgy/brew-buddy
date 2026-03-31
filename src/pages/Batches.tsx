@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { api } from "@/lib/api";
+import type { Batch } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Loader2, FlaskConical } from "lucide-react";
@@ -11,15 +12,7 @@ import { format } from "date-fns";
 const Batches = () => {
   const { data: batches, isLoading } = useQuery({
     queryKey: ["batches"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("batches")
-        .select("*, recipes(name)")
-        .order("start_date", { ascending: false });
-
-      if (error) throw error;
-      return data;
-    },
+    queryFn: () => api.get<Batch[]>('/batches'),
   });
 
   const getStatusColor = (status: string) => {
