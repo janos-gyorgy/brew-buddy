@@ -44,7 +44,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="HipPotion" className="h-10 w-10 object-contain" />
+              <img src="/logo.png" alt="HipPotion" className="h-14 w-14 object-contain" />
               <h1 className="text-2xl font-bold text-foreground">HipPotion</h1>
             </div>
             <div className="flex items-center gap-4">
