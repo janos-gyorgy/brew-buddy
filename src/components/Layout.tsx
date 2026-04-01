@@ -1,11 +1,21 @@
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { FlaskConical, Beaker, LayoutDashboard, ScrollText, Download, BarChart3 } from "lucide-react";
+import { FlaskConical, Beaker, LayoutDashboard, ScrollText, Download, BarChart3, Sun, Moon } from "lucide-react";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
+import { useEffect, useState } from "react";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
+  const [dark, setDark] = useState(() => {
+    const stored = localStorage.getItem("theme");
+    return stored ? stored === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+  });
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", dark);
+    localStorage.setItem("theme", dark ? "dark" : "light");
+  }, [dark]);
 
   const handleExportData = async () => {
     try {
@@ -72,6 +82,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               <Button variant="ghost" size="sm" className="hidden md:flex items-center gap-2" onClick={handleExportData}>
                 <Download className="h-4 w-4" />
                 Export
+              </Button>
+              <Button variant="ghost" size="icon" onClick={() => setDark(d => !d)}>
+                {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
             </div>
           </div>
