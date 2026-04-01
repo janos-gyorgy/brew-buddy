@@ -6,6 +6,7 @@ import type { Recipe, Batch } from "@/lib/types";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import DefaultInput from "@/components/DefaultInput";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,7 +26,7 @@ const BatchForm = () => {
   const isEdit = !!id;
 
   const [formData, setFormData] = useState({
-    batch_code: "",
+    batch_code: format(new Date(), "yyyy-MM-dd") + "-A",
     recipe_id: recipeId || "",
     start_date: format(new Date(), "yyyy-MM-dd"),
     status: "planned",
@@ -203,12 +204,13 @@ const BatchForm = () => {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="batch_code">Batch Code *</Label>
-                  <Input
+                  <DefaultInput
                     id="batch_code"
                     required
                     value={formData.batch_code}
                     onChange={(e) => handleChange("batch_code", e.target.value)}
-                    placeholder="2025-11-20-A"
+                    onValueChange={(v) => handleChange("batch_code", v)}
+                    defaultFillValue={format(new Date(), "yyyy-MM-dd") + "-A"}
                   />
                 </div>
                 <div className="space-y-2">
@@ -247,14 +249,15 @@ const BatchForm = () => {
                       </span>
                     )}
                   </Label>
-                  <Input
+                  <DefaultInput
                     id="total_volume_liters"
                     type="number"
                     step="0.1"
                     required
                     value={formData.total_volume_liters}
                     onChange={(e) => handleChange("total_volume_liters", e.target.value)}
-                    placeholder="5.0"
+                    onValueChange={(v) => handleChange("total_volume_liters", v)}
+                    defaultFillValue="5.0"
                   />
                 </div>
                 <div className="space-y-2">
@@ -327,20 +330,22 @@ const BatchForm = () => {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="vessel_type">Vessel Type</Label>
-                  <Input
+                  <DefaultInput
                     id="vessel_type"
                     value={formData.vessel_type}
                     onChange={(e) => handleChange("vessel_type", e.target.value)}
-                    placeholder="3L glass jar"
+                    onValueChange={(v) => handleChange("vessel_type", v)}
+                    defaultFillValue="3L glass jar"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="vessel_location">Location</Label>
-                  <Input
+                  <DefaultInput
                     id="vessel_location"
                     value={formData.vessel_location}
                     onChange={(e) => handleChange("vessel_location", e.target.value)}
-                    placeholder="Kitchen shelf left"
+                    onValueChange={(v) => handleChange("vessel_location", v)}
+                    defaultFillValue="Kitchen shelf left"
                   />
                 </div>
               </div>
@@ -406,11 +411,12 @@ const BatchForm = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="starter_source">Starter Source</Label>
-                <Input
+                <DefaultInput
                   id="starter_source"
                   value={formData.starter_source}
                   onChange={(e) => handleChange("starter_source", e.target.value)}
-                  placeholder="Main starter jar #1"
+                  onValueChange={(v) => handleChange("starter_source", v)}
+                  defaultFillValue="Main starter jar #1"
                 />
               </div>
               <div className="space-y-2">
