@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Wine, FlaskConical, TestTubes, LayoutDashboard, BookOpen, Download, BarChart3 } from "lucide-react";
+import { FlaskConical, Beaker, LayoutDashboard, ScrollText, Download, BarChart3 } from "lucide-react";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
 
@@ -32,9 +32,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   const navItems = [
     { path: "/", label: "Dashboard", icon: LayoutDashboard },
-    { path: "/recipes", label: "Recipes", icon: BookOpen },
+    { path: "/recipes", label: "Recipes", icon: ScrollText },
     { path: "/batches", label: "Batches", icon: FlaskConical },
-    { path: "/f2-variants", label: "F2", icon: TestTubes },
+    { path: "/f2-variants", label: "F2", icon: Beaker },
     { path: "/statistics", label: "Stats", icon: BarChart3 },
   ];
 
@@ -44,8 +44,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Wine className="h-8 w-8 text-primary" />
-              <h1 className="text-2xl font-bold text-foreground">Brew Buddy</h1>
+              <img src="/logo.png" alt="HipPotion" className="h-10 w-10 object-contain" />
+              <h1 className="text-2xl font-bold text-foreground">HipPotion</h1>
             </div>
             <div className="flex items-center gap-4">
               <nav className="hidden md:flex gap-6">
