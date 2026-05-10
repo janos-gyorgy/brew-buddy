@@ -11,7 +11,9 @@ api:
     tag: latest
     pullPolicy: IfNotPresent
   env:
-    DATABASE_URL: "postgresql://brewbuddy:changeme@brew-muse-postgres:5432/brewbuddy"
+    # DATABASE_URL is constructed from postgres.* values at deploy time.
+    # Override this if using an external database.
+    DATABASE_URL: ""
     PORT: "3000"
   resources:
     limits:
@@ -30,8 +32,8 @@ postgres:
   image: postgres:16-alpine
   database: brewbuddy
   username: brewbuddy
-  # Set this via --set postgres.password=... or a Secret
-  password: changeme
+  # Required — set via --set postgres.password=<your-password> or a values override
+  password: ""
   storage: 5Gi
 
 service:

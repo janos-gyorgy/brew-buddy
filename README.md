@@ -1,73 +1,99 @@
-# Welcome to your Lovable project
+# HipPotion
 
-## Project info
+A self-hosted kombucha brewing tracker. Manage recipes, track batches through their fermentation lifecycle, log pH/Brix/temperature observations, and record second-fermentation variants and botanical infusions.
 
-**URL**: https://lovable.dev/projects/1a389445-23c6-4bdf-8a32-ccb776a47f19
+Built to run on Kubernetes via a Helm chart, with no external dependencies beyond a PostgreSQL database.
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+- **Recipes** — brewing recipe templates with ingredients and process notes; botanical infusions managed per recipe
+- **Batches** — full lifecycle tracking (`planned → active → conditioning → finished`) referencing a recipe
+- **Fermentation log** — time-series observations per batch (pH, Brix, temperature, tasting notes)
+- **F2 variants** — second-fermentation bottles split from a batch, each with its own flavour profile
+- **Starter log** — SCOBY and starter culture tracking
+- **Statistics** — batch summary and trend views
+- **Export** — full data export as JSON
+- **Dark mode** — persisted to localStorage
 
-**Use Lovable**
+## Stack
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/1a389445-23c6-4bdf-8a32-ccb776a47f19) and start prompting.
+| Layer | Tech |
+|-------|------|
+| Frontend | React, Vite, TypeScript, TanStack Query, shadcn/ui, Tailwind CSS |
+| Backend | Hono, TypeScript, Drizzle ORM |
+| Database | PostgreSQL |
+| Deployment | Helm chart, nginx (frontend), Kubernetes |
 
-Changes made via Lovable will be committed automatically to this repo.
+## Running locally
 
-**Use your preferred IDE**
+```bash
+# Install dependencies
+npm install
+cd server && npm install && cd ..
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+# Start the backend (requires a running PostgreSQL instance)
+export DATABASE_URL="postgresql://user:pass@localhost:5432/hippotion"
+cd server && npm run dev &
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start the frontend (proxies /api to backend via Vite config)
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Open http://localhost:5173
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Deploying on Kubernetes
 
-**Use GitHub Codespaces**
+The Helm chart in `helm/brew-muse/` deploys:
+- nginx frontend container
+- Hono API container
+- PostgreSQL StatefulSet (optional — disable and set `DATABASE_URL` to use an external database)
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```bash
+# Build and load images onto your node (k3s example)
+docker build -t brew-muse:latest .
+docker build -f Dockerfile.server -t brew-muse-api:latest .
+docker save brew-muse:latest | k3s ctr images import -
+docker save brew-muse-api:latest | k3s ctr images import -
 
-## What technologies are used for this project?
+# Install the Helm chart
+helm install hippotion ./helm/brew-muse \
+  --namespace hippotion \
+  --create-namespace \
+  --set postgres.password=<your-password>
+```
 
-This project is built with:
+Key values:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+| Value | Default | Description |
+|-------|---------|-------------|
+| `postgres.password` | `""` | **Required.** PostgreSQL password |
+| `postgres.enabled` | `true` | Deploy in-cluster PostgreSQL StatefulSet |
+| `api.env.DATABASE_URL` | auto-constructed | Override if using an external database |
+| `ingress.hosts[0].host` | `brew-muse.local` | Hostname for the ingress rule |
+| `postgres.storage` | `5Gi` | PVC size for the PostgreSQL StatefulSet |
 
-## How can I deploy this project?
+## Project structure
 
-Simply open [Lovable](https://lovable.dev/projects/1a389445-23c6-4bdf-8a32-ccb776a47f19) and click on Share -> Publish.
+```
+src/                    # React frontend
+  pages/                # one file per route
+  components/
+    ui/                 # shadcn/ui primitives (do not edit manually)
+    Layout.tsx          # shared shell with nav and dark mode toggle
+  lib/
+    api.ts              # thin fetch wrapper (api.get/post/put/patch/delete)
+    types.ts            # TypeScript interfaces mirroring the DB schema
+    validationSchemas.ts # Zod schemas used in forms
 
-## Can I connect a custom domain to my Lovable project?
+server/src/             # Hono backend
+  index.ts              # app setup, mounts all routers under /api/
+  schema.ts             # Drizzle schema — single source of truth for DB tables
+  db.ts                 # Drizzle client (reads DATABASE_URL)
+  routes/               # one file per resource
 
-Yes, you can!
+helm/brew-muse/         # Helm chart for Kubernetes deployment
+```
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## License
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+MIT

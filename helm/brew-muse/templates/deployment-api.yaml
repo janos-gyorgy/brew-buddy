@@ -26,7 +26,13 @@ spec:
               protocol: TCP
           env:
             - name: DATABASE_URL
+              {{- if .Values.api.env.DATABASE_URL }}
               value: {{ .Values.api.env.DATABASE_URL | quote }}
+              {{- else if .Values.postgres.enabled }}
+              value: {{ printf "postgresql://%s:%s@%s-postgres:5432/%s" .Values.postgres.username .Values.postgres.password (include "brew-muse.fullname" .) .Values.postgres.database | quote }}
+              {{- else }}
+              value: ""
+              {{- end }}
             - name: PORT
               value: {{ .Values.api.env.PORT | quote }}
           livenessProbe:
