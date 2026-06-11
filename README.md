@@ -1,4 +1,4 @@
-# HipPotion
+# Brew Buddy
 
 A self-hosted kombucha brewing tracker. Manage recipes, track batches through their fermentation lifecycle, log pH/Brix/temperature observations, and record second-fermentation variants and botanical infusions.
 
@@ -43,7 +43,7 @@ Open http://localhost:5173
 
 ## Deploying on Kubernetes
 
-The Helm chart in `helm/brew-muse/` deploys:
+The Helm chart in `helm/brew-muse/` (the chart and image names predate the repo name and are kept for deployment compatibility) deploys:
 - nginx frontend container
 - Hono API container
 - PostgreSQL StatefulSet (optional — disable and set `DATABASE_URL` to use an external database)
