@@ -4,6 +4,10 @@ A self-hosted kombucha brewing tracker. Manage recipes, track batches through th
 
 Built to run on Kubernetes via a Helm chart, with no external dependencies beyond a PostgreSQL database.
 
+| Batch detail with fermentation log | Statistics (dark mode) |
+|---|---|
+| ![Batch detail with fermentation log](docs/batch-detail.png) | ![Statistics in dark mode](docs/statistics-dark.png) |
+
 ## Features
 
 - **Recipes** — brewing recipe templates with ingredients and process notes; botanical infusions managed per recipe
