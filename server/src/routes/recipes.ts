@@ -1,10 +1,11 @@
 import { Hono } from 'hono';
-import { desc, eq } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
 import { db } from '../db.js';
 import { recipes } from '../schema.js';
 import { toNum } from '../utils.js';
+import type { AppEnv } from '../types.js';
 
-const router = new Hono();
+const router = new Hono<AppEnv>();
 
 function mapRecipe(r: typeof recipes.$inferSelect) {
   return {
@@ -18,12 +19,15 @@ function mapRecipe(r: typeof recipes.$inferSelect) {
 }
 
 router.get('/', async (c) => {
-  const rows = await db.select().from(recipes).orderBy(desc(recipes.created_at));
+  const rows = await db.select().from(recipes)
+    .where(eq(recipes.user_id, c.get('userId')))
+    .orderBy(desc(recipes.created_at));
   return c.json(rows.map(mapRecipe));
 });
 
 router.get('/:id', async (c) => {
-  const row = await db.select().from(recipes).where(eq(recipes.id, c.req.param('id')));
+  const row = await db.select().from(recipes)
+    .where(and(eq(recipes.id, c.req.param('id')), eq(recipes.user_id, c.get('userId'))));
   if (!row[0]) return c.json({ message: 'Not found' }, 404);
   return c.json(mapRecipe(row[0]));
 });
@@ -31,6 +35,7 @@ router.get('/:id', async (c) => {
 router.post('/', async (c) => {
   const body = await c.req.json();
   const [row] = await db.insert(recipes).values({
+    user_id: c.get('userId'),
     name: body.name,
     description: body.description || null,
     intent_or_mood: body.intent_or_mood || null,
@@ -79,13 +84,14 @@ router.put('/:id', async (c) => {
     f2_sugar_or_juice_guidelines: body.f2_sugar_or_juice_guidelines || null,
     notes: body.notes || null,
     updated_at: new Date(),
-  }).where(eq(recipes.id, c.req.param('id'))).returning();
+  }).where(and(eq(recipes.id, c.req.param('id')), eq(recipes.user_id, c.get('userId')))).returning();
   if (!row) return c.json({ message: 'Not found' }, 404);
   return c.json(mapRecipe(row));
 });
 
 router.delete('/:id', async (c) => {
-  await db.delete(recipes).where(eq(recipes.id, c.req.param('id')));
+  await db.delete(recipes)
+    .where(and(eq(recipes.id, c.req.param('id')), eq(recipes.user_id, c.get('userId'))));
   return c.json({ success: true });
 });
 

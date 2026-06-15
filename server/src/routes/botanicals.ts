@@ -1,10 +1,11 @@
 import { Hono } from 'hono';
-import { desc, eq } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
 import { db } from '../db.js';
 import { botanicalInfusions } from '../schema.js';
 import { toNum } from '../utils.js';
+import type { AppEnv } from '../types.js';
 
-const router = new Hono();
+const router = new Hono<AppEnv>();
 
 function mapInfusion(r: typeof botanicalInfusions.$inferSelect) {
   return {
@@ -16,13 +17,16 @@ function mapInfusion(r: typeof botanicalInfusions.$inferSelect) {
 }
 
 router.get('/', async (c) => {
-  const rows = await db.select().from(botanicalInfusions).orderBy(desc(botanicalInfusions.created_at));
+  const rows = await db.select().from(botanicalInfusions)
+    .where(eq(botanicalInfusions.user_id, c.get('userId')))
+    .orderBy(desc(botanicalInfusions.created_at));
   return c.json(rows.map(mapInfusion));
 });
 
 router.post('/', async (c) => {
   const body = await c.req.json();
   const [row] = await db.insert(botanicalInfusions).values({
+    user_id: c.get('userId'),
     name: body.name,
     ingredient: body.ingredient,
     amount_g: body.amount_g?.toString() ?? null,
@@ -45,13 +49,14 @@ router.put('/:id', async (c) => {
     steep_minutes: body.steep_minutes ?? null,
     notes: body.notes || null,
     updated_at: new Date(),
-  }).where(eq(botanicalInfusions.id, c.req.param('id'))).returning();
+  }).where(and(eq(botanicalInfusions.id, c.req.param('id')), eq(botanicalInfusions.user_id, c.get('userId')))).returning();
   if (!row) return c.json({ message: 'Not found' }, 404);
   return c.json(mapInfusion(row));
 });
 
 router.delete('/:id', async (c) => {
-  await db.delete(botanicalInfusions).where(eq(botanicalInfusions.id, c.req.param('id')));
+  await db.delete(botanicalInfusions)
+    .where(and(eq(botanicalInfusions.id, c.req.param('id')), eq(botanicalInfusions.user_id, c.get('userId'))));
   return c.json({ success: true });
 });
 

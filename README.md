@@ -1,6 +1,6 @@
 # Brew Buddy
 
-A self-hosted kombucha brewing tracker. Manage recipes, track batches through their fermentation lifecycle, log pH/Brix/temperature observations, and record second-fermentation variants and botanical infusions.
+A self-hosted, **multi-user** kombucha brewing tracker. Manage recipes, track batches through their fermentation lifecycle, log pH/Brix/temperature observations, and record second-fermentation variants and botanical infusions. Every account sees only its own data.
 
 Built to run on Kubernetes via a Helm chart, with no external dependencies beyond a PostgreSQL database.
 
@@ -10,6 +10,7 @@ Built to run on Kubernetes via a Helm chart, with no external dependencies beyon
 
 ## Features
 
+- **Accounts** — username/password login with per-user data isolation; self-serve registration gated by a shared invite code, plus a first-login tutorial and a built-in kombucha quickstart guide
 - **Recipes** — brewing recipe templates with ingredients and process notes; botanical infusions managed per recipe
 - **Batches** — full lifecycle tracking (`planned → active → conditioning → finished`) referencing a recipe
 - **Fermentation log** — time-series observations per batch (pH, Brix, temperature, tasting notes)
@@ -36,14 +37,27 @@ npm install
 cd server && npm install && cd ..
 
 # Start the backend (requires a running PostgreSQL instance)
-export DATABASE_URL="postgresql://user:pass@localhost:5432/hippotion"
+export DATABASE_URL="postgresql://user:pass@localhost:5432/brewbuddy"
+export INVITE_CODE="let-me-in"   # required for registration
 cd server && npm run dev &
 
 # Start the frontend (proxies /api to backend via Vite config)
 npm run dev
 ```
 
-Open http://localhost:5173
+Open http://localhost:5173. The backend applies its SQL migrations automatically on startup. Register with the invite code above to create your first account.
+
+## Accounts & authentication
+
+- Sessions are signed JWTs stored in an httpOnly cookie; set `SESSION_SECRET` (required when `NODE_ENV=production`).
+- Registration requires the shared `INVITE_CODE`. Leave it unset/empty to close registration.
+- All migrations are idempotent and run on every boot — no separate migration step.
+- To adopt an existing single-user database into an owner account, run the one-off seed (reads credentials from the environment so nothing is committed):
+
+```bash
+cd server && npm run build
+OWNER_USERNAME="me" OWNER_PASSWORD="<password>" npm run seed:owner
+```
 
 ## Deploying on Kubernetes
 
@@ -60,10 +74,12 @@ docker save brew-muse:latest | k3s ctr images import -
 docker save brew-muse-api:latest | k3s ctr images import -
 
 # Install the Helm chart
-helm install hippotion ./helm/brew-muse \
-  --namespace hippotion \
+helm install brew-buddy ./helm/brew-muse \
+  --namespace brew-buddy \
   --create-namespace \
-  --set postgres.password=<your-password>
+  --set postgres.password=<your-password> \
+  --set api.env.SESSION_SECRET=<random-secret> \
+  --set api.env.INVITE_CODE=<your-invite-code>
 ```
 
 Key values:
@@ -71,6 +87,9 @@ Key values:
 | Value | Default | Description |
 |-------|---------|-------------|
 | `postgres.password` | `""` | **Required.** PostgreSQL password |
+| `api.env.SESSION_SECRET` | `""` | **Required in production.** Secret used to sign session cookies |
+| `api.env.INVITE_CODE` | `""` | Shared invite code for registration (empty = registration closed) |
+| `api.env.NODE_ENV` | `production` | Marks session cookies Secure |
 | `postgres.enabled` | `true` | Deploy in-cluster PostgreSQL StatefulSet |
 | `api.env.DATABASE_URL` | auto-constructed | Override if using an external database |
 | `ingress.hosts[0].host` | `brew-muse.local` | Hostname for the ingress rule |

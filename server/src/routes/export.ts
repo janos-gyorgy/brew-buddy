@@ -1,16 +1,19 @@
 import { Hono } from 'hono';
+import { eq } from 'drizzle-orm';
 import { db } from '../db.js';
 import { recipes, batches, f2VariantBatches, fermentationLogEntries, starterLog } from '../schema.js';
+import type { AppEnv } from '../types.js';
 
-const router = new Hono();
+const router = new Hono<AppEnv>();
 
 router.get('/', async (c) => {
+  const userId = c.get('userId');
   const [allRecipes, allBatches, allF2, allLogs, allStarters] = await Promise.all([
-    db.select().from(recipes),
-    db.select().from(batches),
-    db.select().from(f2VariantBatches),
-    db.select().from(fermentationLogEntries),
-    db.select().from(starterLog),
+    db.select().from(recipes).where(eq(recipes.user_id, userId)),
+    db.select().from(batches).where(eq(batches.user_id, userId)),
+    db.select().from(f2VariantBatches).where(eq(f2VariantBatches.user_id, userId)),
+    db.select().from(fermentationLogEntries).where(eq(fermentationLogEntries.user_id, userId)),
+    db.select().from(starterLog).where(eq(starterLog.user_id, userId)),
   ]);
 
   let text = '=== BREW BUDDY DATA EXPORT ===\n\n';

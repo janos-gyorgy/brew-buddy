@@ -1,12 +1,19 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { FlaskConical, Beaker, LayoutDashboard, ScrollText, Download, BarChart3, Sun, Moon } from "lucide-react";
+import { FlaskConical, Beaker, LayoutDashboard, ScrollText, Download, BarChart3, Sun, Moon, BookOpen, LogOut, User } from "lucide-react";
 import { Button } from "./ui/button";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
+  DropdownMenuSeparator, DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/lib/auth";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [dark, setDark] = useState(() => {
     const stored = localStorage.getItem("theme");
     return stored ? stored === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -40,6 +47,15 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch {
+      // ignore — clearing local state and redirecting is enough
+    }
+    navigate("/login");
+  };
+
   const navItems = [
     { path: "/", label: "Dashboard", icon: LayoutDashboard },
     { path: "/recipes", label: "Recipes", icon: ScrollText },
@@ -53,10 +69,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       <header className="border-b border-border bg-card">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="HipPotion" className="h-14 w-14 object-contain" />
-              <h1 className="text-2xl font-bold text-foreground">HipPotion</h1>
-            </div>
+            <Link to="/" className="flex items-center gap-3">
+              <FlaskConical className="h-9 w-9 text-primary" />
+              <h1 className="text-2xl font-bold text-foreground">Brew Buddy</h1>
+            </Link>
             <div className="flex items-center gap-4">
               <nav className="hidden md:flex gap-6">
                 {navItems.map((item) => {
@@ -86,6 +102,27 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               <Button variant="ghost" size="icon" onClick={() => setDark(d => !d)}>
                 {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" aria-label="Account">
+                    <User className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {user && <DropdownMenuLabel>{user.username}</DropdownMenuLabel>}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/guide" target="_blank" rel="noopener noreferrer">
+                      <BookOpen className="h-4 w-4 mr-2" />
+                      Brewing guide
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Log out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
           <nav className="md:hidden flex gap-1 mt-4">

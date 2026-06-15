@@ -35,6 +35,12 @@ spec:
               {{- end }}
             - name: PORT
               value: {{ .Values.api.env.PORT | quote }}
+            - name: NODE_ENV
+              value: {{ .Values.api.env.NODE_ENV | quote }}
+            - name: SESSION_SECRET
+              value: {{ .Values.api.env.SESSION_SECRET | quote }}
+            - name: INVITE_CODE
+              value: {{ .Values.api.env.INVITE_CODE | quote }}
           livenessProbe:
             httpGet:
               path: /health
