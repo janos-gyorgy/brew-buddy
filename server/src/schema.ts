@@ -1,5 +1,13 @@
-import { pgTable, text, uuid, numeric, timestamp, integer, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, text, uuid, numeric, timestamp, integer, boolean, pgEnum } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
+
+export const users = pgTable('users', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  username: text('username').notNull().unique(),
+  password_hash: text('password_hash').notNull(),
+  onboarded: boolean('onboarded').default(false).notNull(),
+  created_at: timestamp('created_at').defaultNow().notNull(),
+});
 
 export const batchStatusEnum = pgEnum('batch_status', [
   'planned', 'fermenting_f1', 'ready_for_f2', 'fermenting_f2',
@@ -11,6 +19,7 @@ export const starterStatusEnum = pgEnum('starter_status', ['active', 'low_volume
 
 export const recipes = pgTable('recipes', {
   id: uuid('id').primaryKey().defaultRandom(),
+  user_id: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   description: text('description'),
   intent_or_mood: text('intent_or_mood'),
@@ -37,6 +46,7 @@ export const recipes = pgTable('recipes', {
 
 export const batches = pgTable('batches', {
   id: uuid('id').primaryKey().defaultRandom(),
+  user_id: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }),
   batch_code: text('batch_code').notNull(),
   recipe_id: uuid('recipe_id').references(() => recipes.id),
   start_date: text('start_date').notNull(),
@@ -57,6 +67,7 @@ export const batches = pgTable('batches', {
 
 export const fermentationLogEntries = pgTable('fermentation_log_entries', {
   id: uuid('id').primaryKey().defaultRandom(),
+  user_id: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }),
   batch_id: uuid('batch_id').notNull().references(() => batches.id, { onDelete: 'cascade' }),
   phase: fermentationPhaseEnum('phase').default('f1').notNull(),
   timestamp: timestamp('timestamp').defaultNow().notNull(),
@@ -72,6 +83,7 @@ export const fermentationLogEntries = pgTable('fermentation_log_entries', {
 
 export const f2VariantBatches = pgTable('f2_variant_batches', {
   id: uuid('id').primaryKey().defaultRandom(),
+  user_id: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }),
   parent_batch_id: uuid('parent_batch_id').notNull().references(() => batches.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   bottle_count: integer('bottle_count').notNull(),
@@ -91,6 +103,7 @@ export const f2VariantBatches = pgTable('f2_variant_batches', {
 
 export const starterLog = pgTable('starter_log', {
   id: uuid('id').primaryKey().defaultRandom(),
+  user_id: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   creation_date: text('creation_date').notNull(),
   status: starterStatusEnum('status').default('active').notNull(),
@@ -105,6 +118,7 @@ export const starterLog = pgTable('starter_log', {
 
 export const botanicalInfusions = pgTable('botanical_infusions', {
   id: uuid('id').primaryKey().defaultRandom(),
+  user_id: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   ingredient: text('ingredient').notNull(),
   amount_g: numeric('amount_g'),

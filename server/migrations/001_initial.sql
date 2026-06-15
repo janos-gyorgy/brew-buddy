@@ -1,12 +1,24 @@
-CREATE TYPE batch_status AS ENUM (
-  'planned', 'fermenting_f1', 'ready_for_f2', 'fermenting_f2',
-  'cold_crash', 'bottled', 'finished', 'failed'
-);
-CREATE TYPE f2_status AS ENUM ('fermenting', 'cold_crash', 'ready', 'consumed', 'failed');
-CREATE TYPE fermentation_phase AS ENUM ('f1', 'f2', 'cold_crash', 'storage');
-CREATE TYPE starter_status AS ENUM ('active', 'low_volume', 'retired');
+-- Idempotent: safe to re-run on every boot (see server/src/migrate.ts).
+DO $$ BEGIN
+  CREATE TYPE batch_status AS ENUM (
+    'planned', 'fermenting_f1', 'ready_for_f2', 'fermenting_f2',
+    'cold_crash', 'bottled', 'finished', 'failed'
+  );
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-CREATE TABLE recipes (
+DO $$ BEGIN
+  CREATE TYPE f2_status AS ENUM ('fermenting', 'cold_crash', 'ready', 'consumed', 'failed');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  CREATE TYPE fermentation_phase AS ENUM ('f1', 'f2', 'cold_crash', 'storage');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  CREATE TYPE starter_status AS ENUM ('active', 'low_volume', 'retired');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+CREATE TABLE IF NOT EXISTS recipes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   description TEXT,
@@ -32,7 +44,7 @@ CREATE TABLE recipes (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE batches (
+CREATE TABLE IF NOT EXISTS batches (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   batch_code TEXT NOT NULL,
   recipe_id UUID REFERENCES recipes(id),
@@ -52,7 +64,7 @@ CREATE TABLE batches (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE fermentation_log_entries (
+CREATE TABLE IF NOT EXISTS fermentation_log_entries (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   batch_id UUID NOT NULL REFERENCES batches(id) ON DELETE CASCADE,
   phase fermentation_phase NOT NULL DEFAULT 'f1',
@@ -67,7 +79,7 @@ CREATE TABLE fermentation_log_entries (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE f2_variant_batches (
+CREATE TABLE IF NOT EXISTS f2_variant_batches (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   parent_batch_id UUID NOT NULL REFERENCES batches(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
@@ -86,7 +98,7 @@ CREATE TABLE f2_variant_batches (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE starter_log (
+CREATE TABLE IF NOT EXISTS starter_log (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   creation_date TEXT NOT NULL,
@@ -100,7 +112,7 @@ CREATE TABLE starter_log (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE botanical_infusions (
+CREATE TABLE IF NOT EXISTS botanical_infusions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   ingredient TEXT NOT NULL,

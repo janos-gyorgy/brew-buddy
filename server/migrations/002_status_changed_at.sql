@@ -1,1 +1,1 @@
-ALTER TABLE batches ADD COLUMN status_changed_at TIMESTAMP;
+ALTER TABLE batches ADD COLUMN IF NOT EXISTS status_changed_at TIMESTAMP;

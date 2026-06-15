@@ -15,6 +15,14 @@ api:
     # Override this if using an external database.
     DATABASE_URL: ""
     PORT: "3000"
+    # Marks cookies Secure and requires SESSION_SECRET to be set.
+    NODE_ENV: "production"
+    # Required in production — secret used to sign session cookies (JWT).
+    # Set via --set api.env.SESSION_SECRET=<random-string> or a values override.
+    SESSION_SECRET: ""
+    # Required for self-serve registration — the shared invite code new users
+    # must enter to create an account. Leave empty to disable registration.
+    INVITE_CODE: ""
   resources:
     limits:
       cpu: 200m
