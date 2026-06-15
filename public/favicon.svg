@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <rect width="32" height="32" rx="7" fill="#bd7828"/>
+  <!-- flask glass -->
+  <path d="M12 5.5h8a1.2 1.2 0 0 1 0 2.4h-1.4v3.8l6.6 11a2.6 2.6 0 0 1-2.2 4H11.2a2.6 2.6 0 0 1-2.2-4l6.6-11V7.9H12a1.2 1.2 0 0 1 0-2.4z" fill="#f7f1e8"/>
+  <!-- liquid -->
+  <path d="M10.4 18h11.2l3 5a2.6 2.6 0 0 1-2.2 4H9.6a2.6 2.6 0 0 1-2.2-4z" fill="#bd7828"/>
+  <!-- bubbles -->
+  <circle cx="13.5" cy="21.5" r="1" fill="#f7f1e8"/>
+  <circle cx="18" cy="22.6" r="0.8" fill="#f7f1e8"/>
+  <circle cx="16" cy="24.4" r="0.6" fill="#f7f1e8"/>
+</svg>
