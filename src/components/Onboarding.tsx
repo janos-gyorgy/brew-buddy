@@ -1,8 +1,9 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import GuideContent from "./GuideContent";
-import { Sparkles, ScrollText, LineChart, Beaker, ArrowRight } from "lucide-react";
+import { F1Section, F2Section } from "./GuideContent";
+import { Sparkles, ScrollText, LineChart, Beaker, ArrowRight, BookOpen } from "lucide-react";
 
 interface Slide {
   icon: typeof Sparkles;
@@ -66,11 +67,21 @@ const Onboarding = () => {
               </div>
               <h2 className="text-2xl font-bold text-foreground">Welcome to Brew Buddy</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                New to brewing? Here's the 5-minute quickstart. Then we'll show you around.
+                Kombucha brews in two stages. Here's the gist — then we'll show you around.
               </p>
             </div>
-            <div className="overflow-y-auto px-6 py-5">
-              <GuideContent />
+            <div className="space-y-4 overflow-y-auto px-6 py-5">
+              <F1Section />
+              <F2Section />
+              <Link
+                to="/guide"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 font-medium text-primary transition-colors hover:bg-primary/10"
+              >
+                <BookOpen className="h-4 w-4" />
+                Full quickstart — ingredients, safety &amp; tips
+              </Link>
             </div>
           </>
         ) : (

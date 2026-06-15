@@ -35,6 +35,51 @@ const Step = ({ n, title, children }: { n: number; title: string; children: Reac
   </li>
 );
 
+export const F1Section = () => (
+  <Section icon={FlaskConical} title="F1 — the main ferment">
+    <ol className="space-y-3">
+      <Step n={1} title="Brew sweet tea.">
+        A good beginner ratio is about <strong className="text-foreground">5 g of tea per litre</strong> of
+        water and <strong className="text-foreground">60–70 g of sugar per litre</strong>. Steep the tea,
+        then stir in the sugar until fully dissolved.
+      </Step>
+      <Step n={2} title="Cool it down.">
+        Let the sweet tea reach room temperature — hot liquid will hurt the SCOBY.
+      </Step>
+      <Step n={3} title="Add SCOBY + starter.">
+        Pour the cooled tea into your jar, add the starter liquid (roughly 10–20% of the volume)
+        and the SCOBY.
+      </Step>
+      <Step n={4} title="Cover and wait.">
+        Cover with the cloth, keep it warmish (around 20–26 °C) out of direct sun, and leave it
+        for 7–14 days.
+      </Step>
+      <Step n={5} title="Taste from day 7.">
+        Sip with a clean straw. Too sweet? Give it longer. Pleasantly tart? It's ready.
+      </Step>
+    </ol>
+  </Section>
+);
+
+export const F2Section = () => (
+  <Section icon={Beaker} title="F2 — flavour & fizz (optional)">
+    <ol className="space-y-3">
+      <Step n={1} title="Reserve starter.">
+        Set aside ~1 cup of kombucha (and the SCOBY) for your next batch.
+      </Step>
+      <Step n={2} title="Bottle with flavour.">
+        Bottle the rest in sealable bottles, adding a little fruit, juice, or herbs.
+      </Step>
+      <Step n={3} title="Build carbonation.">
+        Seal and leave at room temperature for 2–4 days.
+      </Step>
+      <Step n={4} title="Chill.">
+        Refrigerate to stop the fizz building. Open over a sink the first few times.
+      </Step>
+    </ol>
+  </Section>
+);
+
 const GuideContent = () => {
   const needs = [
     "A wide glass jar (2–4 L)",
@@ -65,46 +110,8 @@ const GuideContent = () => {
         </ul>
       </Section>
 
-      <Section icon={FlaskConical} title="F1 — the main ferment">
-        <ol className="space-y-3">
-          <Step n={1} title="Brew sweet tea.">
-            A good beginner ratio is about <strong className="text-foreground">5 g of tea per litre</strong> of
-            water and <strong className="text-foreground">60–70 g of sugar per litre</strong>. Steep the tea,
-            then stir in the sugar until fully dissolved.
-          </Step>
-          <Step n={2} title="Cool it down.">
-            Let the sweet tea reach room temperature — hot liquid will hurt the SCOBY.
-          </Step>
-          <Step n={3} title="Add SCOBY + starter.">
-            Pour the cooled tea into your jar, add the starter liquid (roughly 10–20% of the volume)
-            and the SCOBY.
-          </Step>
-          <Step n={4} title="Cover and wait.">
-            Cover with the cloth, keep it warmish (around 20–26 °C) out of direct sun, and leave it
-            for 7–14 days.
-          </Step>
-          <Step n={5} title="Taste from day 7.">
-            Sip with a clean straw. Too sweet? Give it longer. Pleasantly tart? It's ready.
-          </Step>
-        </ol>
-      </Section>
-
-      <Section icon={Beaker} title="F2 — flavour & fizz (optional)">
-        <ol className="space-y-3">
-          <Step n={1} title="Reserve starter.">
-            Set aside ~1 cup of kombucha (and the SCOBY) for your next batch.
-          </Step>
-          <Step n={2} title="Bottle with flavour.">
-            Bottle the rest in sealable bottles, adding a little fruit, juice, or herbs.
-          </Step>
-          <Step n={3} title="Build carbonation.">
-            Seal and leave at room temperature for 2–4 days.
-          </Step>
-          <Step n={4} title="Chill.">
-            Refrigerate to stop the fizz building. Open over a sink the first few times.
-          </Step>
-        </ol>
-      </Section>
+      <F1Section />
+      <F2Section />
 
       <div className="rounded-xl border border-primary/30 bg-primary/5 p-5">
         <h2 className="flex items-center gap-2 text-lg font-semibold text-foreground">
